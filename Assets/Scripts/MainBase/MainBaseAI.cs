@@ -36,7 +36,7 @@ public class MainBaseAI : MonoBehaviour
     {
         _resourceScaner = new ResourceScaner(_map);
         _prefabCollectorBot = Resources.Load<CollectorBotAI>("Prefabs/CollectorBot");
-        _maxCountCollectorBots = 3;
+        _maxCountCollectorBots = 1;
         _freeResources = new List<Resource>();
         _resourcesPlannedForCollection = new List<Resource>();
         _poolOfWorkingCollectorBots = new List<CollectorBotAI>();

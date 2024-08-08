@@ -29,6 +29,7 @@ public class CollectorBotAI : MonoBehaviour
 
     private void OnEnable()
     {
+        _resource = null;
         _mover.MoveCompleted += OnMoveCompleted;
     }
 
@@ -42,7 +43,6 @@ public class CollectorBotAI : MonoBehaviour
 
     private void Start()
     {
-        _resource = null;
         _durationOfCollecting = 5f;
         _resourceAttachmentPoint = new Vector3(0, transform.localScale.y, 0);
     }

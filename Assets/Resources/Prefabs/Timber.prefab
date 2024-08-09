@@ -83,7 +83,7 @@ GameObject:
   - component: {fileID: 3893116117964454231}
   - component: {fileID: 5803839191960465628}
   - component: {fileID: 3873336568533436472}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Born
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -192,7 +192,7 @@ GameObject:
   - component: {fileID: 4536274026781709661}
   - component: {fileID: 6202237655014993050}
   - component: {fileID: 5907497585097596894}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Krone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -299,7 +299,7 @@ GameObject:
   - component: {fileID: 1881735057191438177}
   - component: {fileID: 6706728448792078411}
   - component: {fileID: 8903547158279368808}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Krone (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -406,7 +406,7 @@ GameObject:
   - component: {fileID: 9193055878696906602}
   - component: {fileID: 1514047603556785368}
   - component: {fileID: 5953184794221376449}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Krone (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

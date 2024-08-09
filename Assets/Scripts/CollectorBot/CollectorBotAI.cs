@@ -3,7 +3,7 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class CollectorBotAI : MonoBehaviour
+public class CollectorBotAI : SelectableObject
 {
     private BotMover _mover;
     private Resource _resource;
@@ -20,8 +20,9 @@ public class CollectorBotAI : MonoBehaviour
     public event Action CollectingFinished;
     public event Action<CollectorBotAI> TaskCompleted;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         _mover = transform.AddComponent<BotMover>();
         _resourceMask = LayerMask.NameToLayer("Resource");
         _interactableObjectMask = LayerMask.NameToLayer("Interactable");
@@ -44,7 +45,7 @@ public class CollectorBotAI : MonoBehaviour
     private void Start()
     {
         _durationOfCollecting = 5f;
-        _resourceAttachmentPoint = new Vector3(0, transform.localScale.y, 0);
+        _resourceAttachmentPoint = new Vector3(0, transform.localScale.y + 1, 0);
     }
 
     public void GoTo(Vector3 point)

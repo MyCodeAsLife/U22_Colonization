@@ -41,7 +41,7 @@ public class BotMover : MonoBehaviour
     private IEnumerator Moving()
     {
         _isWork = true;
-        _targetPoint.y = 1;
+        _targetPoint.y = 0;
 
         while (_isWork)
         {

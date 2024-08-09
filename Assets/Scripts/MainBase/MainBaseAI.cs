@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MainBaseAI : MonoBehaviour
+public class MainBaseAI : SelectableObject
 {
     [SerializeField] private Transform _map;
     [SerializeField] private Transform _gatheringPoint;
@@ -36,7 +36,7 @@ public class MainBaseAI : MonoBehaviour
     {
         _resourceScaner = new ResourceScaner(_map);
         _prefabCollectorBot = Resources.Load<CollectorBotAI>("Prefabs/CollectorBot");
-        _maxCountCollectorBots = 1;
+        _maxCountCollectorBots = 3;
         _freeResources = new List<Resource>();
         _resourcesPlannedForCollection = new List<Resource>();
         _poolOfWorkingCollectorBots = new List<CollectorBotAI>();

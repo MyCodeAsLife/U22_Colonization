@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1621705598262110223}
   - component: {fileID: 5614444442540372384}
   - component: {fileID: 5616441027200609914}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -87,7 +87,7 @@ GameObject:
   - component: {fileID: 2199340531450113202}
   - component: {fileID: 6197087108724652670}
   - component: {fileID: 9123495273599410049}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -191,7 +191,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2839669012882581061}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Fill Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -230,7 +230,7 @@ GameObject:
   - component: {fileID: 53826791399561118}
   - component: {fileID: 7258718634908244617}
   - component: {fileID: 2657533273853748148}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: ProgressBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -413,7 +413,7 @@ GameObject:
   - component: {fileID: 7582719178716104519}
   - component: {fileID: 6033644464057062521}
   - component: {fileID: 1532101643318305731}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}

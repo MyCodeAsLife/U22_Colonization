@@ -74,6 +74,18 @@ public class MainBaseAI : SelectableObject
         }
     }
 
+    public override void OnHover()
+    {
+        base.OnHover();
+        _selectionIndicator.localScale = Vector3.one * 0.5f;        // Magical
+    }
+
+    public override void OnUnhover()                // Проблема с уменьшением круга выделения, при убирании наведения на объект
+    {
+        base.OnUnhover();
+        _selectionIndicator.localScale = Vector3.one * 0.25f;       // Magical
+    }
+
     private void OnCollectorBotTaskCompleted(CollectorBotAI bot)
     {
         _poolOfWorkingCollectorBots.Remove(bot);
@@ -112,7 +124,7 @@ public class MainBaseAI : SelectableObject
         var collectorBot = Instantiate<CollectorBotAI>(_prefabCollectorBot);
         collectorBot.TaskCompleted += OnCollectorBotTaskCompleted;
         collectorBot.transform.position = transform.position;
-        collectorBot.transform.SetParent(transform);
+        collectorBot.transform.SetParent(transform.parent);
         collectorBot.SetBaseAffiliation(this);
         collectorBot.GoTo(_gatheringPoint.position);
         _poolOfWorkingCollectorBots.Add(collectorBot);

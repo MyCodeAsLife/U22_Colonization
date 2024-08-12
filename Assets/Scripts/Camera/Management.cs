@@ -1,45 +1,89 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 public class Management : MonoBehaviour
 {
     private int _selectionMask;
+    private Ray _ray;
+    private RaycastHit _hit = new();
     private SelectableObject _hovered;
+    private List<SelectableObject> _listOfSelected = new();
+    private MainInputActions _inputActions;
+
+    private void Awake()
+    {
+        _inputActions = new MainInputActions();
+    }
+
+    private void OnEnable()
+    {
+        _inputActions.Enable();
+        _inputActions.Mouse.LeftButtonClick.performed += OnLeftMouseClick;
+    }
+
+    private void OnDisable()
+    {
+        _inputActions.Mouse.LeftButtonClick.performed -= OnLeftMouseClick;
+        _inputActions.Disable();
+    }
 
     private void Start()
     {
         _selectionMask = LayerMask.NameToLayer("Interactable") /*& LayerMask.NameToLayer("Resource")*/;
-        //Debug.Log(_selectionMask);
+        //_hit = new RaycastHit();
+    }
+
+    private void OnLeftMouseClick(InputAction.CallbackContext context)
+    {
+        if (_hovered != null && _listOfSelected.Contains(_hovered) == false)
+        {
+            _listOfSelected.Add(_hovered);
+            _hovered.Select();
+        }
+        else if (_hovered == null)
+        {
+            foreach (var item in _listOfSelected.ToArray())
+            {
+                item.UnSelect();
+                _listOfSelected.Remove(item);
+            }
+        }
     }
 
     private void LateUpdate()
     {
-        RaycastHit hit = new RaycastHit();                                          // Создать заранее в Start например
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);                // Создать заранее в Start например
-        Debug.DrawRay(ray.origin, ray.direction * 100f, Color.red);                 // Отрисовка луча из камеры, Длиной 100
+        _ray = Camera.main.ScreenPointToRay(Input.mousePosition);                   // Необходимо каждый раз получать новый луч
 
-        if (Physics.Raycast(ray.origin, ray.direction, out hit, 100/*, _selectionMask*/ /*^ int.MaxValue*/))    // Отказывается адекватно воспринимать маску
+        if (Physics.Raycast(_ray.origin, _ray.direction, out _hit, 100/*, _selectionMask*/ /*^ int.MaxValue*/))    // Отказывается адекватно воспринимать маску
         {
-            //Debug.Log(hit.collider.gameObject.layer);
-            //Debug.Log(hit.collider.transform.name);        //----------
-
-            if (hit.collider.TryGetComponent<SelectableObject>(out SelectableObject obj))
+            if (_hit.collider.gameObject.layer == _selectionMask)
             {
-                Debug.Log(obj.transform.name);
+                if (_hit.collider.TryGetComponent<SelectableObject>(out SelectableObject obj) == false)
+                    throw new Exception("This object does not inherit from SelectableObject");
 
                 if (_hovered != obj)
                 {
-                    _hovered?.UnSelect();
+                    _hovered?.OnUnhover();
                     _hovered = obj;
-                    _hovered.Select();
+                    _hovered.OnHover();
                 }
             }
             else
             {
-                _hovered?.UnSelect();
-                _hovered = null;
+                UnhoverCurrentObject();
             }
-
         }
+        else
+        {
+            UnhoverCurrentObject();
+        }
+    }
+
+    private void UnhoverCurrentObject()
+    {
+        _hovered?.OnUnhover();
+        _hovered = null;
     }
 }

@@ -34,6 +34,7 @@ public class MainBaseAI : SelectableObject
 
     private void Start()
     {
+        _selectionIndicator.localScale = Vector3.one * 0.5f;                                // Magical ???
         _resourceScaner = new ResourceScaner(_map);
         _prefabCollectorBot = Resources.Load<CollectorBotAI>("Prefabs/CollectorBot");
         _maxCountCollectorBots = 3;
@@ -72,18 +73,6 @@ public class MainBaseAI : SelectableObject
                 MarbleQuantityChanged?.Invoke(_numberOfMarble);
                 break;
         }
-    }
-
-    public override void OnHover()
-    {
-        base.OnHover();
-        _selectionIndicator.localScale = Vector3.one * 0.5f;        // Magical
-    }
-
-    public override void OnUnhover()                // Проблема с уменьшением круга выделения, при убирании наведения на объект
-    {
-        base.OnUnhover();
-        _selectionIndicator.localScale = Vector3.one * 0.25f;       // Magical
     }
 
     private void OnCollectorBotTaskCompleted(CollectorBotAI bot)

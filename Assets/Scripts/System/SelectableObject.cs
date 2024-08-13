@@ -22,7 +22,7 @@ public class SelectableObject : MonoBehaviour
         transform.localScale = Vector3.one;
     }
 
-    public virtual void Select()
+    public virtual void Selected()
     {
         _selectionIndicator.gameObject.SetActive(true);
     }

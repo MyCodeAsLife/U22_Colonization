@@ -1,0 +1,149 @@
+{
+    "name": "MainInputActions",
+    "maps": [
+        {
+            "name": "Mouse",
+            "id": "5b6fc92f-e0c7-4232-bffe-690df94849dc",
+            "actions": [
+                {
+                    "name": "LeftButtonClick",
+                    "type": "Button",
+                    "id": "1c1f642e-9a6f-4479-8c52-6851f920ff51",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RightButtonClick",
+                    "type": "Button",
+                    "id": "4478ad80-2a27-49dd-940e-2eeeb56d07cc",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "7bb67b8a-a472-41c9-b495-56c13b8832bf",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard and Mouse",
+                    "action": "LeftButtonClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7667a6a2-3620-428f-81ad-89183ec99ad4",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard and Mouse",
+                    "action": "RightButtonClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Shortcut",
+            "id": "58ed7e8b-2dd1-463b-9af2-516a6ee319a7",
+            "actions": [
+                {
+                    "name": "Ctrl+LeftMouse",
+                    "type": "Button",
+                    "id": "60c34102-6dfb-4b47-b7c3-f5d1de1bc12b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "One Modifier",
+                    "id": "3f646dd7-61f8-459f-a39a-a48754e42840",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Ctrl+LeftMouse",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "f68110af-0595-4867-8b4d-9997da526929",
+                    "path": "<Keyboard>/ctrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Ctrl+LeftMouse",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "16074707-6b7b-4ac3-9fdc-238de95ff774",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Ctrl+LeftMouse",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                }
+            ]
+        },
+        {
+            "name": "Keyboard",
+            "id": "1edf01dc-ecd8-42dd-8223-d9c5a3ace60d",
+            "actions": [
+                {
+                    "name": "Ctrl",
+                    "type": "Button",
+                    "id": "859a030a-339a-4271-9b2f-0cd7ecf5b3a5",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "43bba0b1-8eb2-4c63-8ed1-7608f72cc441",
+                    "path": "<Keyboard>/ctrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Ctrl",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "Keyboard and Mouse",
+            "bindingGroup": "Keyboard and Mouse",
+            "devices": [
+                {
+                    "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<Mouse>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}

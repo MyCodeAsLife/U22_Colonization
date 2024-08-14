@@ -9,7 +9,7 @@ public class BotMover : MonoBehaviour
     private NavMeshAgent _agent;
     private Coroutine _moving;
     private Vector3 _targetPoint;
-    private bool _isWork;
+    //private bool _isWork;
     private float _moveSpeed;
 
     public event Action MoveCompleted;
@@ -54,10 +54,10 @@ public class BotMover : MonoBehaviour
 
     private IEnumerator Moving()
     {
-        _isWork = true;
+        bool isWork = true;
         _targetPoint.y = 0;
 
-        while (_isWork)                     // Переделать на  _agent.isStopped ???
+        while (isWork)                     // Переделать на  _agent.isStopped ???
         {
             yield return null;
             //transform.LookAt(_targetPoint);
@@ -67,7 +67,7 @@ public class BotMover : MonoBehaviour
             //_agent.Move(_targetPoint);
 
             if (Vector3.Distance(transform.position, _targetPoint) < 0.1f)
-                _isWork = false;
+                isWork = false;
         }
 
         _agent.isStopped = true;

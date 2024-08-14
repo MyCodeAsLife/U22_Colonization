@@ -22,6 +22,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "LeftButtonHold",
+                    "type": "Button",
+                    "id": "af092eb0-0516-4bb6-a80a-768c66716b83",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press(pressPoint=0.1)",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -44,6 +53,17 @@
                     "processors": "",
                     "groups": "Keyboard and Mouse",
                     "action": "RightButtonClick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d8ad6bd4-8d84-4ccb-ac78-69fd0c296f7d",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Press(pressPoint=0.5)",
+                    "processors": "",
+                    "groups": "Keyboard and Mouse",
+                    "action": "LeftButtonHold",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

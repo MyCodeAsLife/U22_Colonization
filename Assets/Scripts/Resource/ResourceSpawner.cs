@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -14,6 +15,7 @@ public class ResourceSpawner : MonoBehaviour
     private int _maxFoodOnMap;
     private int _maxTimberOnMap;
     private int _maxMarbleOnMap;
+    private int _groundLayerMask;
 
     private float _mapX;
     private float _mapZ;
@@ -27,6 +29,7 @@ public class ResourceSpawner : MonoBehaviour
         _timberSpawner = new ResourceSpawnerBase(timberPrefab, CreateResource, transform);
         var marblePrefab = Resources.Load<Resource>("Prefabs/Marble");
         _marbleSpawner = new ResourceSpawnerBase(marblePrefab, CreateResource, transform);
+        _groundLayerMask = LayerMask.NameToLayer("Ground");
     }
 
     private void OnEnable()
@@ -90,18 +93,42 @@ public class ResourceSpawner : MonoBehaviour
     private IEnumerator SpawnRes(ResourceSpawnerBase resourceSpawner, int numberOfResource)
     {
         var delay = new WaitForSeconds(_spawnDelay);
+        bool isWork = true;
 
         for (int i = 0; i < numberOfResource; i++)
         {
             yield return delay;
+            isWork = true;
 
-            float posX = Random.Range(-_mapX, _mapX);
-            float posZ = Random.Range(-_mapZ, _mapZ);
-            Vector3 spawnPos = new Vector3(posX, 0f, posZ);
+            //float posX = Random.Range(-_mapX, _mapX);
+            //float posZ = Random.Range(-_mapZ, _mapZ);
+            //Vector3 spawnPos = new Vector3(posX, 0f, posZ);
+            Vector3 checkArea = new Vector3(3, 3, 3);                               // Magic
+            Vector3 spawnPos = Vector3.zero;
+            //var res = resourceSpawner.Spawn(/*spawnPos*/);
+
+            //res.transform.position = spawnPos;
+            //res.gameObject.SetActive(true);
+
+            while (isWork)
+            {
+                float posX = Random.Range(-_mapX, _mapX);
+                float posZ = Random.Range(-_mapZ, _mapZ);
+                spawnPos = new Vector3(posX, 0f, posZ);
+
+                IList<Resource> list = new List<Resource>();
+                Collider[] hits = Physics.OverlapBox(spawnPos, checkArea, Quaternion.identity, _groundLayerMask);
+
+                if (hits.Length == 0)
+                    isWork = false;
+            }
+
+            //res.transform.position = spawnPos;
+            //res.gameObject.SetActive(true);
             resourceSpawner.Spawn(spawnPos);
         }
 
-        _navMesh?.BuildNavMesh();                                                                        // +++++
+        //_navMesh?.BuildNavMesh();                                                                        // +++++
     }
 
     private IEnumerator InitialResourceSpawn()

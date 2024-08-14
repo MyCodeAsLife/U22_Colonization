@@ -44,6 +44,15 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""LeftButtonHold"",
+                    ""type"": ""Button"",
+                    ""id"": ""af092eb0-0516-4bb6-a80a-768c66716b83"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press(pressPoint=0.1)"",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -66,6 +75,17 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard and Mouse"",
                     ""action"": ""RightButtonClick"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d8ad6bd4-8d84-4ccb-ac78-69fd0c296f7d"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": ""Press(pressPoint=0.5)"",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard and Mouse"",
+                    ""action"": ""LeftButtonHold"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -173,6 +193,7 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
         m_Mouse = asset.FindActionMap("Mouse", throwIfNotFound: true);
         m_Mouse_LeftButtonClick = m_Mouse.FindAction("LeftButtonClick", throwIfNotFound: true);
         m_Mouse_RightButtonClick = m_Mouse.FindAction("RightButtonClick", throwIfNotFound: true);
+        m_Mouse_LeftButtonHold = m_Mouse.FindAction("LeftButtonHold", throwIfNotFound: true);
         // Shortcut
         m_Shortcut = asset.FindActionMap("Shortcut", throwIfNotFound: true);
         m_Shortcut_CtrlLeftMouse = m_Shortcut.FindAction("Ctrl+LeftMouse", throwIfNotFound: true);
@@ -242,12 +263,14 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
     private List<IMouseActions> m_MouseActionsCallbackInterfaces = new List<IMouseActions>();
     private readonly InputAction m_Mouse_LeftButtonClick;
     private readonly InputAction m_Mouse_RightButtonClick;
+    private readonly InputAction m_Mouse_LeftButtonHold;
     public struct MouseActions
     {
         private @MainInputActions m_Wrapper;
         public MouseActions(@MainInputActions wrapper) { m_Wrapper = wrapper; }
         public InputAction @LeftButtonClick => m_Wrapper.m_Mouse_LeftButtonClick;
         public InputAction @RightButtonClick => m_Wrapper.m_Mouse_RightButtonClick;
+        public InputAction @LeftButtonHold => m_Wrapper.m_Mouse_LeftButtonHold;
         public InputActionMap Get() { return m_Wrapper.m_Mouse; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -263,6 +286,9 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
             @RightButtonClick.started += instance.OnRightButtonClick;
             @RightButtonClick.performed += instance.OnRightButtonClick;
             @RightButtonClick.canceled += instance.OnRightButtonClick;
+            @LeftButtonHold.started += instance.OnLeftButtonHold;
+            @LeftButtonHold.performed += instance.OnLeftButtonHold;
+            @LeftButtonHold.canceled += instance.OnLeftButtonHold;
         }
 
         private void UnregisterCallbacks(IMouseActions instance)
@@ -273,6 +299,9 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
             @RightButtonClick.started -= instance.OnRightButtonClick;
             @RightButtonClick.performed -= instance.OnRightButtonClick;
             @RightButtonClick.canceled -= instance.OnRightButtonClick;
+            @LeftButtonHold.started -= instance.OnLeftButtonHold;
+            @LeftButtonHold.performed -= instance.OnLeftButtonHold;
+            @LeftButtonHold.canceled -= instance.OnLeftButtonHold;
         }
 
         public void RemoveCallbacks(IMouseActions instance)
@@ -395,6 +424,7 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
     {
         void OnLeftButtonClick(InputAction.CallbackContext context);
         void OnRightButtonClick(InputAction.CallbackContext context);
+        void OnLeftButtonHold(InputAction.CallbackContext context);
     }
     public interface IShortcutActions
     {

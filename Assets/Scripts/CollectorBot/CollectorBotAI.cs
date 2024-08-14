@@ -6,9 +6,10 @@ using UnityEngine;
 public class CollectorBotAI : SelectableObject
 {
     private BotMover _mover;
-    private Resource _resource;
+    [SerializeField] private Resource _resource;                                         //++++++++++
     private MainBaseAI _mainBase;
     private SingleReactiveProperty<float> _collectionProgress = new();
+    private Coroutine _collecting;
 
     private Vector3 _resourceAttachmentPoint;
     private bool _haveCollectedResource;
@@ -31,6 +32,7 @@ public class CollectorBotAI : SelectableObject
     private void OnEnable()
     {
         _resource = null;
+        _collecting = null;
         _mover.MoveCompleted += OnMoveCompleted;
     }
 
@@ -40,6 +42,9 @@ public class CollectorBotAI : SelectableObject
             _mover.Stop();
 
         _mover.MoveCompleted -= OnMoveCompleted;
+
+        if (_collecting != null)
+            StopCoroutine(_collecting);
     }
 
     private void Start()
@@ -50,6 +55,13 @@ public class CollectorBotAI : SelectableObject
 
     public void GoTo(Vector3 point)
     {
+        if (_collecting != null)
+        {
+            StopCoroutine(_collecting);
+            _collecting = null;
+            CollectingFinished?.Invoke();
+        }
+
         _mover.Move(point);
     }
 
@@ -84,7 +96,7 @@ public class CollectorBotAI : SelectableObject
             if (other.GetComponent<Resource>() == _resource)
             {
                 _mover.Stop();
-                StartCoroutine(Collecting());
+                _collecting = StartCoroutine(Collecting());
             }
         }
         else if (other.gameObject.layer == _interactableObjectMask && _haveCollectedResource)
@@ -103,11 +115,17 @@ public class CollectorBotAI : SelectableObject
         _haveCollectedResource = false;
         _mainBase.StoreResource(_resource.ResourceType);
         _resource.Delete();
+        _resource = null;
     }
 
     private void OnMoveCompleted()
     {
-        TaskCompleted?.Invoke(this);
+        if (_resource == null)
+            TaskCompleted?.Invoke(this);
+        else if (_haveCollectedResource == false && _resource != null)
+            GoTo(_resource.transform.position);
+        else
+            GoTo(_mainBase.transform.position);
     }
 
     private IEnumerator Collecting()
@@ -128,5 +146,6 @@ public class CollectorBotAI : SelectableObject
         _resource.transform.SetParent(transform);
         _resource.transform.localPosition = _resourceAttachmentPoint;
         _mover.Move(_mainBase.transform.position);
+        _collecting = null;
     }
 }

@@ -51,8 +51,26 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
                     ""id"": ""af092eb0-0516-4bb6-a80a-768c66716b83"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": ""Press(pressPoint=0.1)"",
+                    ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""LeftButtonSlowTap"",
+                    ""type"": ""Button"",
+                    ""id"": ""cf86be7f-be03-4afb-99f4-e20da6e67e38"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Delta"",
+                    ""type"": ""Value"",
+                    ""id"": ""7899356e-1ec5-44cb-b074-fd9a2954a3bd"",
+                    ""expectedControlType"": ""Delta"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -82,62 +100,34 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""d8ad6bd4-8d84-4ccb-ac78-69fd0c296f7d"",
                     ""path"": ""<Mouse>/leftButton"",
-                    ""interactions"": ""Press(pressPoint=0.5)"",
+                    ""interactions"": ""Hold(duration=0.2,pressPoint=0.2)"",
                     ""processors"": """",
                     ""groups"": ""Keyboard and Mouse"",
                     ""action"": ""LeftButtonHold"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
-                }
-            ]
-        },
-        {
-            ""name"": ""Shortcut"",
-            ""id"": ""58ed7e8b-2dd1-463b-9af2-516a6ee319a7"",
-            ""actions"": [
+                },
                 {
-                    ""name"": ""Ctrl+LeftMouse"",
-                    ""type"": ""Button"",
-                    ""id"": ""60c34102-6dfb-4b47-b7c3-f5d1de1bc12b"",
-                    ""expectedControlType"": ""Button"",
+                    ""name"": """",
+                    ""id"": ""4fe2cf45-5ba7-40e4-a7fc-19428b5e49f1"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": ""SlowTap(duration=0.01,pressPoint=0.01)"",
                     ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                }
-            ],
-            ""bindings"": [
-                {
-                    ""name"": ""One Modifier"",
-                    ""id"": ""3f646dd7-61f8-459f-a39a-a48754e42840"",
-                    ""path"": ""OneModifier"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Ctrl+LeftMouse"",
-                    ""isComposite"": true,
+                    ""groups"": ""Keyboard and Mouse"",
+                    ""action"": ""LeftButtonSlowTap"",
+                    ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": ""modifier"",
-                    ""id"": ""f68110af-0595-4867-8b4d-9997da526929"",
-                    ""path"": ""<Keyboard>/ctrl"",
+                    ""name"": """",
+                    ""id"": ""776a46c4-e74e-43d1-80d9-acffbc4f1261"",
+                    ""path"": ""<Mouse>/delta"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Ctrl+LeftMouse"",
+                    ""groups"": ""Keyboard and Mouse"",
+                    ""action"": ""Delta"",
                     ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""binding"",
-                    ""id"": ""16074707-6b7b-4ac3-9fdc-238de95ff774"",
-                    ""path"": ""<Mouse>/leftButton"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Ctrl+LeftMouse"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -194,9 +184,8 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
         m_Mouse_LeftButtonClick = m_Mouse.FindAction("LeftButtonClick", throwIfNotFound: true);
         m_Mouse_RightButtonClick = m_Mouse.FindAction("RightButtonClick", throwIfNotFound: true);
         m_Mouse_LeftButtonHold = m_Mouse.FindAction("LeftButtonHold", throwIfNotFound: true);
-        // Shortcut
-        m_Shortcut = asset.FindActionMap("Shortcut", throwIfNotFound: true);
-        m_Shortcut_CtrlLeftMouse = m_Shortcut.FindAction("Ctrl+LeftMouse", throwIfNotFound: true);
+        m_Mouse_LeftButtonSlowTap = m_Mouse.FindAction("LeftButtonSlowTap", throwIfNotFound: true);
+        m_Mouse_Delta = m_Mouse.FindAction("Delta", throwIfNotFound: true);
         // Keyboard
         m_Keyboard = asset.FindActionMap("Keyboard", throwIfNotFound: true);
         m_Keyboard_Ctrl = m_Keyboard.FindAction("Ctrl", throwIfNotFound: true);
@@ -264,6 +253,8 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Mouse_LeftButtonClick;
     private readonly InputAction m_Mouse_RightButtonClick;
     private readonly InputAction m_Mouse_LeftButtonHold;
+    private readonly InputAction m_Mouse_LeftButtonSlowTap;
+    private readonly InputAction m_Mouse_Delta;
     public struct MouseActions
     {
         private @MainInputActions m_Wrapper;
@@ -271,6 +262,8 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
         public InputAction @LeftButtonClick => m_Wrapper.m_Mouse_LeftButtonClick;
         public InputAction @RightButtonClick => m_Wrapper.m_Mouse_RightButtonClick;
         public InputAction @LeftButtonHold => m_Wrapper.m_Mouse_LeftButtonHold;
+        public InputAction @LeftButtonSlowTap => m_Wrapper.m_Mouse_LeftButtonSlowTap;
+        public InputAction @Delta => m_Wrapper.m_Mouse_Delta;
         public InputActionMap Get() { return m_Wrapper.m_Mouse; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -289,6 +282,12 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
             @LeftButtonHold.started += instance.OnLeftButtonHold;
             @LeftButtonHold.performed += instance.OnLeftButtonHold;
             @LeftButtonHold.canceled += instance.OnLeftButtonHold;
+            @LeftButtonSlowTap.started += instance.OnLeftButtonSlowTap;
+            @LeftButtonSlowTap.performed += instance.OnLeftButtonSlowTap;
+            @LeftButtonSlowTap.canceled += instance.OnLeftButtonSlowTap;
+            @Delta.started += instance.OnDelta;
+            @Delta.performed += instance.OnDelta;
+            @Delta.canceled += instance.OnDelta;
         }
 
         private void UnregisterCallbacks(IMouseActions instance)
@@ -302,6 +301,12 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
             @LeftButtonHold.started -= instance.OnLeftButtonHold;
             @LeftButtonHold.performed -= instance.OnLeftButtonHold;
             @LeftButtonHold.canceled -= instance.OnLeftButtonHold;
+            @LeftButtonSlowTap.started -= instance.OnLeftButtonSlowTap;
+            @LeftButtonSlowTap.performed -= instance.OnLeftButtonSlowTap;
+            @LeftButtonSlowTap.canceled -= instance.OnLeftButtonSlowTap;
+            @Delta.started -= instance.OnDelta;
+            @Delta.performed -= instance.OnDelta;
+            @Delta.canceled -= instance.OnDelta;
         }
 
         public void RemoveCallbacks(IMouseActions instance)
@@ -319,52 +324,6 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
         }
     }
     public MouseActions @Mouse => new MouseActions(this);
-
-    // Shortcut
-    private readonly InputActionMap m_Shortcut;
-    private List<IShortcutActions> m_ShortcutActionsCallbackInterfaces = new List<IShortcutActions>();
-    private readonly InputAction m_Shortcut_CtrlLeftMouse;
-    public struct ShortcutActions
-    {
-        private @MainInputActions m_Wrapper;
-        public ShortcutActions(@MainInputActions wrapper) { m_Wrapper = wrapper; }
-        public InputAction @CtrlLeftMouse => m_Wrapper.m_Shortcut_CtrlLeftMouse;
-        public InputActionMap Get() { return m_Wrapper.m_Shortcut; }
-        public void Enable() { Get().Enable(); }
-        public void Disable() { Get().Disable(); }
-        public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(ShortcutActions set) { return set.Get(); }
-        public void AddCallbacks(IShortcutActions instance)
-        {
-            if (instance == null || m_Wrapper.m_ShortcutActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_ShortcutActionsCallbackInterfaces.Add(instance);
-            @CtrlLeftMouse.started += instance.OnCtrlLeftMouse;
-            @CtrlLeftMouse.performed += instance.OnCtrlLeftMouse;
-            @CtrlLeftMouse.canceled += instance.OnCtrlLeftMouse;
-        }
-
-        private void UnregisterCallbacks(IShortcutActions instance)
-        {
-            @CtrlLeftMouse.started -= instance.OnCtrlLeftMouse;
-            @CtrlLeftMouse.performed -= instance.OnCtrlLeftMouse;
-            @CtrlLeftMouse.canceled -= instance.OnCtrlLeftMouse;
-        }
-
-        public void RemoveCallbacks(IShortcutActions instance)
-        {
-            if (m_Wrapper.m_ShortcutActionsCallbackInterfaces.Remove(instance))
-                UnregisterCallbacks(instance);
-        }
-
-        public void SetCallbacks(IShortcutActions instance)
-        {
-            foreach (var item in m_Wrapper.m_ShortcutActionsCallbackInterfaces)
-                UnregisterCallbacks(item);
-            m_Wrapper.m_ShortcutActionsCallbackInterfaces.Clear();
-            AddCallbacks(instance);
-        }
-    }
-    public ShortcutActions @Shortcut => new ShortcutActions(this);
 
     // Keyboard
     private readonly InputActionMap m_Keyboard;
@@ -425,10 +384,8 @@ public partial class @MainInputActions: IInputActionCollection2, IDisposable
         void OnLeftButtonClick(InputAction.CallbackContext context);
         void OnRightButtonClick(InputAction.CallbackContext context);
         void OnLeftButtonHold(InputAction.CallbackContext context);
-    }
-    public interface IShortcutActions
-    {
-        void OnCtrlLeftMouse(InputAction.CallbackContext context);
+        void OnLeftButtonSlowTap(InputAction.CallbackContext context);
+        void OnDelta(InputAction.CallbackContext context);
     }
     public interface IKeyboardActions
     {

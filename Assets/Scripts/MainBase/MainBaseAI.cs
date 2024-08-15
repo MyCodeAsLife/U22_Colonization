@@ -78,7 +78,9 @@ public class MainBaseAI : SelectableObject
     private void OnCollectorBotTaskCompleted(CollectorBotAI bot)
     {
         _poolOfWorkingCollectorBots.Remove(bot);
-        _poolOfIdleCollectorBots.Add(bot);
+
+        //if (_poolOfIdleCollectorBots.Contains(bot) == false)
+            _poolOfIdleCollectorBots.Add(bot);
     }
 
     private void FindFreeResources()
@@ -116,7 +118,7 @@ public class MainBaseAI : SelectableObject
         collectorBot.transform.SetParent(transform.parent);
         collectorBot.SetBaseAffiliation(this);
         collectorBot.GoTo(_gatheringPoint.position);
-        _poolOfWorkingCollectorBots.Add(collectorBot);
+        _poolOfIdleCollectorBots.Add(collectorBot);
     }
 
     private IEnumerator ResourceScanning()

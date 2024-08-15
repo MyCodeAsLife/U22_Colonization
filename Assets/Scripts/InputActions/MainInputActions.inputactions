@@ -29,8 +29,26 @@
                     "id": "af092eb0-0516-4bb6-a80a-768c66716b83",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Press(pressPoint=0.1)",
+                    "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "LeftButtonSlowTap",
+                    "type": "Button",
+                    "id": "cf86be7f-be03-4afb-99f4-e20da6e67e38",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Delta",
+                    "type": "Value",
+                    "id": "7899356e-1ec5-44cb-b074-fd9a2954a3bd",
+                    "expectedControlType": "Delta",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -60,62 +78,34 @@
                     "name": "",
                     "id": "d8ad6bd4-8d84-4ccb-ac78-69fd0c296f7d",
                     "path": "<Mouse>/leftButton",
-                    "interactions": "Press(pressPoint=0.5)",
+                    "interactions": "Hold(duration=0.2,pressPoint=0.2)",
                     "processors": "",
                     "groups": "Keyboard and Mouse",
                     "action": "LeftButtonHold",
                     "isComposite": false,
                     "isPartOfComposite": false
-                }
-            ]
-        },
-        {
-            "name": "Shortcut",
-            "id": "58ed7e8b-2dd1-463b-9af2-516a6ee319a7",
-            "actions": [
+                },
                 {
-                    "name": "Ctrl+LeftMouse",
-                    "type": "Button",
-                    "id": "60c34102-6dfb-4b47-b7c3-f5d1de1bc12b",
-                    "expectedControlType": "Button",
+                    "name": "",
+                    "id": "4fe2cf45-5ba7-40e4-a7fc-19428b5e49f1",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "SlowTap(duration=0.01,pressPoint=0.01)",
                     "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                }
-            ],
-            "bindings": [
-                {
-                    "name": "One Modifier",
-                    "id": "3f646dd7-61f8-459f-a39a-a48754e42840",
-                    "path": "OneModifier",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Ctrl+LeftMouse",
-                    "isComposite": true,
+                    "groups": "Keyboard and Mouse",
+                    "action": "LeftButtonSlowTap",
+                    "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "modifier",
-                    "id": "f68110af-0595-4867-8b4d-9997da526929",
-                    "path": "<Keyboard>/ctrl",
+                    "name": "",
+                    "id": "776a46c4-e74e-43d1-80d9-acffbc4f1261",
+                    "path": "<Mouse>/delta",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
-                    "action": "Ctrl+LeftMouse",
+                    "groups": "Keyboard and Mouse",
+                    "action": "Delta",
                     "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "binding",
-                    "id": "16074707-6b7b-4ac3-9fdc-238de95ff774",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Ctrl+LeftMouse",
-                    "isComposite": false,
-                    "isPartOfComposite": true
+                    "isPartOfComposite": false
                 }
             ]
         },

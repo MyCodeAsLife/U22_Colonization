@@ -9,10 +9,11 @@ public class PlayerControlSystem : MonoBehaviour
 {
     private int _selectionMask;
     private int _groundMask;
-    private bool _isPresedCtrl;
-    private bool _isHoldLeftMouseButton;
-    private bool _isMouseMove;
-    private bool _isWork;
+    //private bool _isPresedCtrl;                         // Состояние
+    //private bool _isHoldLeftMouseButton;                // Состояние
+    //private bool _isMouseMove;                          // Состояние
+    //private bool _isWork;                               // Состояние
+    private PlayerControlStates _states/* = new()*/;
     private Ray _ray;
     private RaycastHit _hit = new();
     private SelectableObject _hovered;
@@ -28,6 +29,12 @@ public class PlayerControlSystem : MonoBehaviour
     private void Awake()
     {
         _inputActions = new MainInputActions();
+        //Debug.Log("Other: " + ((_states & PlayerControlStates.Other) == PlayerControlStates.Other));
+        //Debug.Log("Frame: " + ((_states & PlayerControlStates.Frame) == PlayerControlStates.Frame));
+        //Debug.Log("MouseMove: " + ((_states & PlayerControlStates.MouseMove) == PlayerControlStates.MouseMove));
+        //Debug.Log("PresedCtrl: " + ((_states & PlayerControlStates.PresedCtrl) == PlayerControlStates.PresedCtrl));
+        //Debug.Log("HoldLeftMouseButton: " + ((_states & PlayerControlStates.HoldLeftMouseButton) == PlayerControlStates.HoldLeftMouseButton));
+        //Debug.Log(_states);
     }
 
     private void OnEnable()
@@ -35,8 +42,8 @@ public class PlayerControlSystem : MonoBehaviour
         _inputActions.Enable();
         _inputActions.Mouse.Delta.started += OnMouseMove;
         _inputActions.Mouse.LeftButtonClick.performed += OnLeftMousePress;
-        _inputActions.Mouse.LeftButtonSlowTap.performed += OnLeftMouseCanceled;
-        _inputActions.Mouse.LeftButtonHold.performed += OnLeftMouseHold;                // Нужно????
+        _inputActions.Mouse.LeftButtonSlowTap.performed += OnLeftMouseSlowTap;
+        //_inputActions.Mouse.LeftButtonHold.performed += OnLeftMouseHold;                // Нужно????
         _inputActions.Mouse.RightButtonClick.canceled += OnRightMouseClick;
         _inputActions.Keyboard.Ctrl.started += OnPressCtrl;
         _inputActions.Keyboard.Ctrl.canceled += OnReleaseCtrl;
@@ -47,8 +54,8 @@ public class PlayerControlSystem : MonoBehaviour
         _inputActions.Keyboard.Ctrl.started -= OnPressCtrl;
         _inputActions.Keyboard.Ctrl.canceled -= OnReleaseCtrl;
         _inputActions.Mouse.RightButtonClick.canceled -= OnRightMouseClick;
-        _inputActions.Mouse.LeftButtonHold.performed -= OnLeftMouseHold;                // Нужно????
-        _inputActions.Mouse.LeftButtonSlowTap.performed += OnLeftMouseCanceled;
+        //_inputActions.Mouse.LeftButtonHold.performed -= OnLeftMouseHold;                // Нужно????
+        _inputActions.Mouse.LeftButtonSlowTap.performed += OnLeftMouseSlowTap;
         _inputActions.Mouse.LeftButtonClick.performed -= OnLeftMousePress;
         _inputActions.Mouse.Delta.started -= OnMouseMove;
         _inputActions.Disable();
@@ -56,8 +63,11 @@ public class PlayerControlSystem : MonoBehaviour
 
     private void Start()
     {
-        _isHoldLeftMouseButton = false;
-        _isPresedCtrl = false;
+        //_isHoldLeftMouseButton = false;
+        //_isPresedCtrl = false;
+        //_states ^= PlayerControlStates.PresedCtrl;
+        //_states ^= PlayerControlStates.HoldLeftMouseButton;
+        _states = PlayerControlStates.None;
         _selectionMask = LayerMask.NameToLayer("Interactable");
         _groundMask = LayerMask.NameToLayer("Ground");
     }
@@ -91,37 +101,45 @@ public class PlayerControlSystem : MonoBehaviour
         }
     }
 
-    private void OnLeftMouseHold(InputAction.CallbackContext context) => _isHoldLeftMouseButton = true;
-    private void OnReleaseCtrl(InputAction.CallbackContext context) => _isPresedCtrl = false;
-    private void OnPressCtrl(InputAction.CallbackContext context) => _isPresedCtrl = true;
+    //private void OnLeftMouseHold(InputAction.CallbackContext context) => _isHoldLeftMouseButton = true;
+    //private void OnReleaseCtrl(InputAction.CallbackContext context) => _isPresedCtrl = false;
+    //private void OnPressCtrl(InputAction.CallbackContext context) => _isPresedCtrl = true;
+
+    //private void OnLeftMouseHold(InputAction.CallbackContext context) => _states |= PlayerControlStates.HoldLeftMouseButton;
+    private void OnReleaseCtrl(InputAction.CallbackContext context) => _states ^= PlayerControlStates.PresedCtrl;
+    private void OnPressCtrl(InputAction.CallbackContext context) => _states |= PlayerControlStates.PresedCtrl;
 
     private void OnMouseMove(InputAction.CallbackContext context)
     {
-        Vector2 endPos;
-        _cursoreCurrentPosition = Input.mousePosition;
-        _startPos = Vector2.Min(_cursoreStartPosition, _cursoreCurrentPosition);
-        endPos = Vector2.Max(_cursoreStartPosition, _cursoreCurrentPosition);
-        _frameImage.rectTransform.anchoredPosition = _startPos;
-        _frameSize = endPos - _startPos;
-        _frameImage.rectTransform.sizeDelta = _frameSize;
-
-        if (_isHoldLeftMouseButton)
+        if ((_states & PlayerControlStates.HoldLeftMouseButton) == PlayerControlStates.HoldLeftMouseButton)
         {
+            Vector2 endPos;
+            _cursoreCurrentPosition = Input.mousePosition;
+            _startPos = Vector2.Min(_cursoreStartPosition, _cursoreCurrentPosition);
+            endPos = Vector2.Max(_cursoreStartPosition, _cursoreCurrentPosition);
+            _frameImage.rectTransform.anchoredPosition = _startPos;
+            _frameSize = endPos - _startPos;
+            _frameImage.rectTransform.sizeDelta = _frameSize;
+
             if (_frameStretching == null)
-                _frameStretching = StartCoroutine(FrameStretching());
+                _frameStretching = StartCoroutine(ObjectsSelecting());
         }
     }
 
-    private void OnLeftMouseCanceled(InputAction.CallbackContext context)
+    private void OnLeftMouseSlowTap(InputAction.CallbackContext context)
     {
-        _isHoldLeftMouseButton = false;
-        _isWork = false;
+        //_isHoldLeftMouseButton = false;
+        //_isWork = false;
+        _states ^= PlayerControlStates.HoldLeftMouseButton;
+        //_states ^= PlayerControlStates.Frame;
         _frameImage.enabled = false;
     }
 
     private void OnLeftMousePress(InputAction.CallbackContext context)
     {
-        if (_isPresedCtrl == false && _isHoldLeftMouseButton == false)
+        //if (_isPresedCtrl == false && _isHoldLeftMouseButton == false)
+        if ((_states & PlayerControlStates.PresedCtrl) != PlayerControlStates.PresedCtrl &&
+            (_states & PlayerControlStates.HoldLeftMouseButton) != PlayerControlStates.HoldLeftMouseButton)
         {
             UnselectAll();
             Select(_hovered);
@@ -138,11 +156,12 @@ public class PlayerControlSystem : MonoBehaviour
         _frameImage.rectTransform.sizeDelta = Vector2.zero;
         _frameImage.enabled = true;
         _cursoreStartPosition = Input.mousePosition;
+        _states |= PlayerControlStates.HoldLeftMouseButton;
     }
 
     private void OnRightMouseClick(InputAction.CallbackContext context)
     {
-        if (_hit.collider.gameObject.layer == _groundMask)
+        if (_hit.collider != null && _hit.collider.gameObject.layer == _groundMask)
             for (int i = 0; i < _listOfSelected.Count; i++)
                 if (_listOfSelected[i].TryGetComponent<CollectorBotAI>(out CollectorBotAI bot))
                     bot.GoTo(_hit.point);
@@ -181,12 +200,15 @@ public class PlayerControlSystem : MonoBehaviour
         _hovered = null;
     }
 
-    private IEnumerator FrameStretching()               // Переименовать метод выделения
+    private IEnumerator ObjectsSelecting()               // Переименовать метод выделения
     {
         var delay = new WaitForEndOfFrame();
-        _isWork = true;
+        //_isWork = true;
+        _states |= PlayerControlStates.FrameStretching;
 
-        while (_isWork)
+        //while (_isWork)
+        while ((_states & PlayerControlStates.FrameStretching) == PlayerControlStates.FrameStretching &&
+            (_states & PlayerControlStates.HoldLeftMouseButton) == PlayerControlStates.HoldLeftMouseButton)
         {
             yield return delay;
             Rect rect = new Rect(_startPos, _frameSize);                                                          // Вынести cоздание rect из цикла
@@ -198,18 +220,21 @@ public class PlayerControlSystem : MonoBehaviour
 
                 if (rect.Contains(screenPosition))
                 {
-                    if (_isPresedCtrl == false)
+                    //if (_isPresedCtrl == false)
+                    if ((_states & PlayerControlStates.PresedCtrl) != PlayerControlStates.PresedCtrl)
                         Select(allBots[i]);
                     else
                         Unselect(allBots[i]);
                 }
-                else if (_isPresedCtrl == false)
+                //else if (_isPresedCtrl == false)
+                else if ((_states & PlayerControlStates.PresedCtrl) != PlayerControlStates.PresedCtrl)
                 {
                     Unselect(allBots[i]);
                 }
             }
         }
 
+        _states ^= PlayerControlStates.FrameStretching;
         _frameStretching = null;
     }
 }

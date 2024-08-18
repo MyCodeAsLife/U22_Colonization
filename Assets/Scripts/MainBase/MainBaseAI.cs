@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MainBaseAI : SelectableObject
+public class MainBaseAI : Building
 {
     [SerializeField] private Transform _map;
     [SerializeField] private Transform _gatheringPoint;
@@ -26,8 +26,10 @@ public class MainBaseAI : SelectableObject
     public event Action<int> TimberQuantityChanged;
     public event Action<int> MarbleQuantityChanged;
 
-    private void OnDisable()
+    protected override void OnDisable()
     {
+        base.OnDisable();
+
         if (_resourceScaning != null)
             StopCoroutine(_resourceScaning);
     }
@@ -80,7 +82,7 @@ public class MainBaseAI : SelectableObject
         _poolOfWorkingCollectorBots.Remove(bot);
 
         //if (_poolOfIdleCollectorBots.Contains(bot) == false)
-            _poolOfIdleCollectorBots.Add(bot);
+        _poolOfIdleCollectorBots.Add(bot);
     }
 
     private void FindFreeResources()

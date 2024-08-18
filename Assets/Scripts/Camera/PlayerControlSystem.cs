@@ -9,6 +9,7 @@ public class PlayerControlSystem : MonoBehaviour
 {
     private int _selectionMask;
     private int _groundMask;
+    private CameraMover _cameraMover;
     //private bool _isPresedCtrl;                         // Состояние
     //private bool _isHoldLeftMouseButton;                // Состояние
     //private bool _isMouseMove;                          // Состояние
@@ -26,15 +27,11 @@ public class PlayerControlSystem : MonoBehaviour
     private Vector2 _frameSize;
     private Coroutine _frameStretching;
 
+    public Ray Ray { get { return _ray; } }
+
     private void Awake()
     {
         _inputActions = new MainInputActions();
-        //Debug.Log("Other: " + ((_states & PlayerControlStates.Other) == PlayerControlStates.Other));
-        //Debug.Log("Frame: " + ((_states & PlayerControlStates.Frame) == PlayerControlStates.Frame));
-        //Debug.Log("MouseMove: " + ((_states & PlayerControlStates.MouseMove) == PlayerControlStates.MouseMove));
-        //Debug.Log("PresedCtrl: " + ((_states & PlayerControlStates.PresedCtrl) == PlayerControlStates.PresedCtrl));
-        //Debug.Log("HoldLeftMouseButton: " + ((_states & PlayerControlStates.HoldLeftMouseButton) == PlayerControlStates.HoldLeftMouseButton));
-        //Debug.Log(_states);
     }
 
     private void OnEnable()
@@ -43,10 +40,10 @@ public class PlayerControlSystem : MonoBehaviour
         _inputActions.Mouse.Delta.started += OnMouseMove;
         _inputActions.Mouse.LeftButtonClick.performed += OnLeftMousePress;
         _inputActions.Mouse.LeftButtonSlowTap.performed += OnLeftMouseSlowTap;
-        //_inputActions.Mouse.LeftButtonHold.performed += OnLeftMouseHold;                // Нужно????
         _inputActions.Mouse.RightButtonClick.canceled += OnRightMouseClick;
         _inputActions.Keyboard.Ctrl.started += OnPressCtrl;
         _inputActions.Keyboard.Ctrl.canceled += OnReleaseCtrl;
+        _cameraMover = new CameraMover(this, _inputActions);
     }
 
     private void OnDisable()
@@ -54,7 +51,6 @@ public class PlayerControlSystem : MonoBehaviour
         _inputActions.Keyboard.Ctrl.started -= OnPressCtrl;
         _inputActions.Keyboard.Ctrl.canceled -= OnReleaseCtrl;
         _inputActions.Mouse.RightButtonClick.canceled -= OnRightMouseClick;
-        //_inputActions.Mouse.LeftButtonHold.performed -= OnLeftMouseHold;                // Нужно????
         _inputActions.Mouse.LeftButtonSlowTap.performed += OnLeftMouseSlowTap;
         _inputActions.Mouse.LeftButtonClick.performed -= OnLeftMousePress;
         _inputActions.Mouse.Delta.started -= OnMouseMove;
@@ -63,10 +59,6 @@ public class PlayerControlSystem : MonoBehaviour
 
     private void Start()
     {
-        //_isHoldLeftMouseButton = false;
-        //_isPresedCtrl = false;
-        //_states ^= PlayerControlStates.PresedCtrl;
-        //_states ^= PlayerControlStates.HoldLeftMouseButton;
         _states = PlayerControlStates.None;
         _selectionMask = LayerMask.NameToLayer("Interactable");
         _groundMask = LayerMask.NameToLayer("Ground");
@@ -105,7 +97,6 @@ public class PlayerControlSystem : MonoBehaviour
     //private void OnReleaseCtrl(InputAction.CallbackContext context) => _isPresedCtrl = false;
     //private void OnPressCtrl(InputAction.CallbackContext context) => _isPresedCtrl = true;
 
-    //private void OnLeftMouseHold(InputAction.CallbackContext context) => _states |= PlayerControlStates.HoldLeftMouseButton;
     private void OnReleaseCtrl(InputAction.CallbackContext context) => _states ^= PlayerControlStates.PresedCtrl;
     private void OnPressCtrl(InputAction.CallbackContext context) => _states |= PlayerControlStates.PresedCtrl;
 
@@ -128,7 +119,6 @@ public class PlayerControlSystem : MonoBehaviour
 
     private void OnLeftMouseSlowTap(InputAction.CallbackContext context)
     {
-        //_isHoldLeftMouseButton = false;
         //_isWork = false;
         _states ^= PlayerControlStates.HoldLeftMouseButton;
         //_states ^= PlayerControlStates.Frame;

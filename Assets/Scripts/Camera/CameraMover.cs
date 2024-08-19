@@ -4,20 +4,20 @@ using UnityEngine.InputSystem;
 public class CameraMover
 {
     private PlayerControlSystem _playerControlSystem;
-    private MainInputActions _mainInputActions;
+    //private MainInputActions _mainInputActions;
     private Vector3 _startPoint;
-    private Plane _plane;
-    private Ray _ray;
+    //private Plane _plane;
+    //private Ray _ray;
 
     public CameraMover(PlayerControlSystem playerControlSystem, MainInputActions inputActions)
     {
-        _plane = new Plane(Vector3.up, Vector3.zero);               // Вместо plane использовать Карту? или расчитывать расстояние по лучу из PlayerControlSystem (
+        //_plane = new Plane(Vector3.up, Vector3.zero);               // Вместо plane использовать Карту? или расчитывать расстояние по лучу из PlayerControlSystem (
         _playerControlSystem = playerControlSystem;
-        _mainInputActions = inputActions;
+        //_mainInputActions = inputActions;
 
-        _mainInputActions.Mouse.Scroll.started += OnMouseScroll;
-        _mainInputActions.Mouse.MiddleButtonClick.performed += OnMouseMiddleButtonClick;
-        _mainInputActions.Mouse.MiddleButtonSlowTap.performed += OnMouseMiddleButtonSlowTap;
+        _playerControlSystem.InputActions.Mouse.Scroll.started += OnMouseScroll;
+        _playerControlSystem.InputActions.Mouse.MiddleButtonClick.performed += OnMouseMiddleButtonClick;
+        _playerControlSystem.InputActions.Mouse.MiddleButtonSlowTap.performed += OnMouseMiddleButtonSlowTap;
     }
 
     ~CameraMover()
@@ -27,40 +27,40 @@ public class CameraMover
 
     private void UnsubscribeAll()
     {
-        _mainInputActions.Mouse.Scroll.started -= OnMouseScroll;
-        _mainInputActions.Mouse.MiddleButtonClick.performed -= OnMouseMiddleButtonClick;
-        _mainInputActions.Mouse.MiddleButtonSlowTap.performed -= OnMouseMiddleButtonSlowTap;
+        _playerControlSystem.InputActions.Mouse.Scroll.started -= OnMouseScroll;
+        _playerControlSystem.InputActions.Mouse.MiddleButtonClick.performed -= OnMouseMiddleButtonClick;
+        _playerControlSystem.InputActions.Mouse.MiddleButtonSlowTap.performed -= OnMouseMiddleButtonSlowTap;
     }
 
     private void OnMouseScroll(InputAction.CallbackContext context)
     {
         const float ScrollSpeed = 3f;
-        _playerControlSystem.transform.Translate(0f, 0f, _mainInputActions.Mouse.Scroll.ReadValue<Vector2>().y * ScrollSpeed);
+        _playerControlSystem.transform.Translate(0f, 0f, _playerControlSystem.InputActions.Mouse.Scroll.ReadValue<Vector2>().y * ScrollSpeed);
     }
 
     private void OnMouseMiddleButtonClick(InputAction.CallbackContext context)
     {
-        _startPoint = GetRaycastPoint();
-        _mainInputActions.Mouse.Delta.started += OnMouseMoveAndMouseMiddleButtonHold;
+        _startPoint = _playerControlSystem.GetRaycastPoint();
+        _playerControlSystem.InputActions.Mouse.Delta.started += OnMouseMoveAndMouseMiddleButtonHold;
     }
 
     private void OnMouseMiddleButtonSlowTap(InputAction.CallbackContext context)
     {
-        _mainInputActions.Mouse.Delta.started -= OnMouseMoveAndMouseMiddleButtonHold;
+        _playerControlSystem.InputActions.Mouse.Delta.started -= OnMouseMoveAndMouseMiddleButtonHold;
     }
 
     private void OnMouseMoveAndMouseMiddleButtonHold(InputAction.CallbackContext context)
     {
-        Vector3 offset = GetRaycastPoint() - _startPoint;
+        Vector3 offset = _playerControlSystem.GetRaycastPoint() - _startPoint;
         _playerControlSystem.transform.position -= offset;
     }
 
-    private Vector3 GetRaycastPoint()
-    {
-        _ray = _playerControlSystem.Ray;
-        _plane.Raycast(_ray, out float distance);
-        return _ray.GetPoint(distance);
-    }
+    //private Vector3 GetRaycastPoint()                                           // Вынести в Control System
+    //{
+    //    _ray = _playerControlSystem.Ray;
+    //    _plane.Raycast(_ray, out float distance);
+    //    return _ray.GetPoint(distance);
+    //}
 
     //private void Start()
     //{

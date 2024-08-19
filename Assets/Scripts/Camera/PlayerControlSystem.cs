@@ -1,15 +1,20 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+//using System.Numerics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(BuildingPlacer))]
 public class PlayerControlSystem : MonoBehaviour
 {
     private int _selectionMask;
     private int _groundMask;
     private CameraMover _cameraMover;
+    private BuildingPlacer _buildingPlacer;
+    private Plane _plane;
     //private bool _isPresedCtrl;                         // Состояние
     //private bool _isHoldLeftMouseButton;                // Состояние
     //private bool _isMouseMove;                          // Состояние
@@ -27,11 +32,14 @@ public class PlayerControlSystem : MonoBehaviour
     private Vector2 _frameSize;
     private Coroutine _frameStretching;
 
-    public Ray Ray { get { return _ray; } }
+    //public Ray Ray { get { return _ray; } }
+    public MainInputActions InputActions { get { return _inputActions; } }
 
     private void Awake()
     {
+        _plane = new Plane(Vector3.up, Vector3.zero);
         _inputActions = new MainInputActions();
+        //_buildingPlacer = transform.AddComponent<BuildingPlacer>();
     }
 
     private void OnEnable()
@@ -44,6 +52,8 @@ public class PlayerControlSystem : MonoBehaviour
         _inputActions.Keyboard.Ctrl.started += OnPressCtrl;
         _inputActions.Keyboard.Ctrl.canceled += OnReleaseCtrl;
         _cameraMover = new CameraMover(this, _inputActions);
+        //_buildingPlacer.SetControlSystem(this);
+        //_buildingPlacer.SetInputActions(_inputActions);
     }
 
     private void OnDisable()
@@ -96,6 +106,13 @@ public class PlayerControlSystem : MonoBehaviour
     //private void OnLeftMouseHold(InputAction.CallbackContext context) => _isHoldLeftMouseButton = true;
     //private void OnReleaseCtrl(InputAction.CallbackContext context) => _isPresedCtrl = false;
     //private void OnPressCtrl(InputAction.CallbackContext context) => _isPresedCtrl = true;
+
+    public Vector3 GetRaycastPoint()                                           // Вынести в Control System
+    {
+        //_ray = _playerControlSystem.Ray;
+        _plane.Raycast(_ray, out float distance);
+        return _ray.GetPoint(distance);
+    }
 
     private void OnReleaseCtrl(InputAction.CallbackContext context) => _states ^= PlayerControlStates.PresedCtrl;
     private void OnPressCtrl(InputAction.CallbackContext context) => _states |= PlayerControlStates.PresedCtrl;

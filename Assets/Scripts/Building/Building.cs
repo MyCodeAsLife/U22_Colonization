@@ -4,40 +4,44 @@ public class Building : SelectableObject
 {
     private BuildingPlacer _buildingPlacer;
     private Vector3 _square;
-    private Vector3 _size;
+    protected Vector3 SelfSize;
 
-    public int Price { get; private set; }
-    public Vector3 Size { get { return _size; } }
+    public int Price { get; protected set; }
+    public Vector3 Size { get { return SelfSize; } }
 
     protected override void Awake()
     {
         base.Awake();
-        _size.x = 3f;
-        _size.z = 3f;
-        _buildingPlacer = Object.FindFirstObjectByType<BuildingPlacer>();
-        OnCellSizeChange(_buildingPlacer.CellSize);
-    }
-
-    protected virtual void OnEnable()
-    {
-        _buildingPlacer.SubscribeOnCellSizeChanged(OnCellSizeChange);
+        SelfSize.x = 3f;
+        SelfSize.z = 3f;
     }
 
     protected virtual void OnDisable()
     {
-        _buildingPlacer.UnSubscribeOnCellSizeChanged(OnCellSizeChange);
+        _buildingPlacer?.UnSubscribeOnCellSizeChanged(OnCellSizeChange);
     }
 
-    private void OnDrawGizmos()
+    private void Start()
     {
-        for (int x = 0; x < _size.x; x++)
+        _buildingPlacer = Object.FindFirstObjectByType<BuildingPlacer>();
+        _buildingPlacer.SubscribeOnCellSizeChanged(OnCellSizeChange);
+        OnCellSizeChange(_buildingPlacer.CellSize);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        float startPositionX = SelfSize.x * _buildingPlacer.CellSize * 0.5f - 1;
+        float startPositionZ = SelfSize.z * _buildingPlacer.CellSize * 0.5f - 1;
+        Vector3 pos = transform.position - new Vector3(startPositionX, 0, startPositionZ);
+
+        for (int x = 0; x < SelfSize.x; x++)
         {
             float sizeX = x * _buildingPlacer.CellSize;
 
-            for (int z = 0; z < _size.z; z++)
+            for (int z = 0; z < SelfSize.z; z++)
             {
                 float sizeZ = z * _buildingPlacer.CellSize;
-                Gizmos.DrawWireCube(transform.position + new Vector3(sizeX, 0, sizeZ), _square);
+                Gizmos.DrawWireCube(pos + new Vector3(sizeX, 0, sizeZ), _square);
             }
         }
     }

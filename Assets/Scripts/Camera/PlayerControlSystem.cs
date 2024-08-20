@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 //using System.Numerics;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -12,6 +11,7 @@ public class PlayerControlSystem : MonoBehaviour
 {
     private int _selectionMask;
     private int _groundMask;
+    private int _uiMask;
     private CameraMover _cameraMover;
     private BuildingPlacer _buildingPlacer;
     private Plane _plane;
@@ -72,6 +72,7 @@ public class PlayerControlSystem : MonoBehaviour
         _states = PlayerControlStates.None;
         _selectionMask = LayerMask.NameToLayer("Interactable");
         _groundMask = LayerMask.NameToLayer("Ground");
+        _uiMask = LayerMask.NameToLayer("UI");
     }
 
     private void LateUpdate()
@@ -144,14 +145,19 @@ public class PlayerControlSystem : MonoBehaviour
 
     private void OnLeftMousePress(InputAction.CallbackContext context)
     {
+        if (_hit.collider != null && _hit.collider.gameObject.layer == _uiMask)     // Найти способ фиксировать нажатие по UI
+            return;
+
+        Debug.Log(_hit.collider.gameObject.layer);                                  //+++++++++++
+
         //if (_isPresedCtrl == false && _isHoldLeftMouseButton == false)
         if ((_states & PlayerControlStates.PresedCtrl) != PlayerControlStates.PresedCtrl &&
-            (_states & PlayerControlStates.HoldLeftMouseButton) != PlayerControlStates.HoldLeftMouseButton)
+        (_states & PlayerControlStates.HoldLeftMouseButton) != PlayerControlStates.HoldLeftMouseButton)
         {
             UnselectAll();
             Select(_hovered);
         }
-        else if (_listOfSelected.Contains(_hovered))
+        else if (_listOfSelected.Contains(_hovered))                                        // Добавить проверку что если клацнули на UI, то это не срабатывает
         {
             Unselect(_hovered);
         }

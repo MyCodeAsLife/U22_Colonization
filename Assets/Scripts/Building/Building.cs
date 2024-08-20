@@ -21,7 +21,7 @@ public class Building : SelectableObject
         _buildingPlacer?.UnSubscribeOnCellSizeChanged(OnCellSizeChange);
     }
 
-    private void Start()
+    protected virtual void Start()
     {
         _buildingPlacer = Object.FindFirstObjectByType<BuildingPlacer>();
         _buildingPlacer.SubscribeOnCellSizeChanged(OnCellSizeChange);

@@ -5,9 +5,10 @@ using UnityEngine;
 
 public class MainBaseAI : Building
 {
-    [SerializeField] private Transform _map;
     [SerializeField] private Transform _gatheringPoint;
+    private BuildingPanelUI _buildingPanelUI;                                                   //+++++
 
+    private Transform _map;
     private Coroutine _resourceScaning;
     private ResourceScaner _resourceScaner;
     private CollectorBotAI _prefabCollectorBot;
@@ -15,7 +16,7 @@ public class MainBaseAI : Building
     private int _numberOfFood;
     private int _numberOfTimber;
     private int _numberOfMarble;
-    private int _maxCountCollectorBots;
+    [SerializeField] private int _maxCountCollectorBots;                         // +++++
 
     private IList<Resource> _freeResources;
     private IList<Resource> _resourcesPlannedForCollection;
@@ -26,6 +27,10 @@ public class MainBaseAI : Building
     public event Action<int> TimberQuantityChanged;
     public event Action<int> MarbleQuantityChanged;
 
+    public int NumberOfFood { get { return _numberOfFood; } }
+    public int NumberOfTimber { get { return _numberOfTimber; } }
+    public int NumberOfMarble { get { return _numberOfMarble; } }
+
     protected override void OnDisable()
     {
         base.OnDisable();
@@ -34,12 +39,15 @@ public class MainBaseAI : Building
             StopCoroutine(_resourceScaning);
     }
 
-    private void Start()
+    protected override void Start()
     {
+        base.Start();
+        _buildingPanelUI = FindFirstObjectByType<BuildingPanelUI>();
+        _map = GameObject.FindGameObjectWithTag("Map").transform;                                // Magical ???
         _selectionIndicator.localScale = Vector3.one * 0.5f;                                // Magical ???
         _resourceScaner = new ResourceScaner(_map);
         _prefabCollectorBot = Resources.Load<CollectorBotAI>("Prefabs/CollectorBot");
-        _maxCountCollectorBots = 3;
+        //_maxCountCollectorBots = 0;
         _freeResources = new List<Resource>();
         _resourcesPlannedForCollection = new List<Resource>();
         _poolOfWorkingCollectorBots = new List<CollectorBotAI>();
@@ -75,6 +83,18 @@ public class MainBaseAI : Building
                 MarbleQuantityChanged?.Invoke(_numberOfMarble);
                 break;
         }
+    }
+
+    public override void Selected()
+    {
+        base.Selected();
+        _buildingPanelUI.LinkBase(this);
+    }
+
+    public override void UnSelect()
+    {
+        base.UnSelect();
+        _buildingPanelUI.UnLinkBase(this);
     }
 
     private void OnCollectorBotTaskCompleted(CollectorBotAI bot)

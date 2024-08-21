@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 //using System.Numerics;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
@@ -19,7 +20,7 @@ public class PlayerControlSystem : MonoBehaviour
     //private bool _isHoldLeftMouseButton;                // Состояние
     //private bool _isMouseMove;                          // Состояние
     //private bool _isWork;                               // Состояние
-    private PlayerControlStates _states/* = new()*/;
+    private PlayerControlStates _states = new();
     private Ray _ray;
     private RaycastHit _hit = new();
     private SelectableObject _hovered;
@@ -34,6 +35,7 @@ public class PlayerControlSystem : MonoBehaviour
 
     //public Ray Ray { get { return _ray; } }
     public MainInputActions InputActions { get { return _inputActions; } }
+    //public SelectableObject SelectableBuilding { get { return _listOfSelected[0]; } }
 
     private void Awake()
     {
@@ -69,11 +71,27 @@ public class PlayerControlSystem : MonoBehaviour
 
     private void Start()
     {
-        _states = PlayerControlStates.None;
         _selectionMask = LayerMask.NameToLayer("Interactable");
         _groundMask = LayerMask.NameToLayer("Ground");
         _uiMask = LayerMask.NameToLayer("UI");
     }
+
+    //private void Update()
+    //{
+    //    DoNotClickUIAndGameAtSameTime();
+    //}
+
+    //private void DoNotClickUIAndGameAtSameTime()
+    //{
+    //    if (EventSystem.current.IsPointerOverGameObject())
+    //    {
+    //        _inputActions.Mouse.Disable();
+    //    }
+    //    else
+    //    {
+    //        _inputActions.Mouse.Enable();
+    //    }
+    //}
 
     private void LateUpdate()
     {
@@ -115,13 +133,14 @@ public class PlayerControlSystem : MonoBehaviour
         return _ray.GetPoint(distance);
     }
 
-    private void OnReleaseCtrl(InputAction.CallbackContext context) => _states ^= PlayerControlStates.PresedCtrl;
-    private void OnPressCtrl(InputAction.CallbackContext context) => _states |= PlayerControlStates.PresedCtrl;
+    private void OnReleaseCtrl(InputAction.CallbackContext context) => _states.PresedCtrl = false;
+    private void OnPressCtrl(InputAction.CallbackContext context) => _states.PresedCtrl = true;
 
     private void OnMouseMove(InputAction.CallbackContext context)
     {
-        if ((_states & PlayerControlStates.HoldLeftMouseButton) == PlayerControlStates.HoldLeftMouseButton)
+        if (_states.HoldLeftMouseButton)
         {
+            //Debug.Log((_states & PlayerControlStates.HoldLeftMouseButton) == PlayerControlStates.HoldLeftMouseButton);              //++++++++
             Vector2 endPos;
             _cursoreCurrentPosition = Input.mousePosition;
             _startPos = Vector2.Min(_cursoreStartPosition, _cursoreCurrentPosition);
@@ -130,7 +149,7 @@ public class PlayerControlSystem : MonoBehaviour
             _frameSize = endPos - _startPos;
             _frameImage.rectTransform.sizeDelta = _frameSize;
 
-            if (_frameStretching == null)
+            if (_frameStretching == null && (_frameSize.x > 10 && _frameSize.y > 10))                             // Magic - погрешность в 10 едениц
                 _frameStretching = StartCoroutine(ObjectsSelecting());
         }
     }
@@ -138,26 +157,25 @@ public class PlayerControlSystem : MonoBehaviour
     private void OnLeftMouseSlowTap(InputAction.CallbackContext context)
     {
         //_isWork = false;
-        _states ^= PlayerControlStates.HoldLeftMouseButton;
+        //Debug.Log("SlowTap1:" + ((_states & PlayerControlStates.HoldLeftMouseButton) == PlayerControlStates.HoldLeftMouseButton)); //+++++++++++++
+        _states.HoldLeftMouseButton = false;
         //_states ^= PlayerControlStates.Frame;
         _frameImage.enabled = false;
+        //Debug.Log("SlowTap2:" + ((_states & PlayerControlStates.HoldLeftMouseButton) == PlayerControlStates.HoldLeftMouseButton)); //+++++++++++++
     }
 
     private void OnLeftMousePress(InputAction.CallbackContext context)
     {
-        if (_hit.collider != null && _hit.collider.gameObject.layer == _uiMask)     // Найти способ фиксировать нажатие по UI
+        if (EventSystem.current.IsPointerOverGameObject())     // Если нажали по UI то ничего не делать
             return;
 
-        Debug.Log(_hit.collider.gameObject.layer);                                  //+++++++++++
-
         //if (_isPresedCtrl == false && _isHoldLeftMouseButton == false)
-        if ((_states & PlayerControlStates.PresedCtrl) != PlayerControlStates.PresedCtrl &&
-        (_states & PlayerControlStates.HoldLeftMouseButton) != PlayerControlStates.HoldLeftMouseButton)
+        if (_states.PresedCtrl == false && _states.HoldLeftMouseButton == false)
         {
             UnselectAll();
             Select(_hovered);
         }
-        else if (_listOfSelected.Contains(_hovered))                                        // Добавить проверку что если клацнули на UI, то это не срабатывает
+        else if (_listOfSelected.Contains(_hovered))
         {
             Unselect(_hovered);
         }
@@ -169,7 +187,7 @@ public class PlayerControlSystem : MonoBehaviour
         _frameImage.rectTransform.sizeDelta = Vector2.zero;
         _frameImage.enabled = true;
         _cursoreStartPosition = Input.mousePosition;
-        _states |= PlayerControlStates.HoldLeftMouseButton;
+        _states.HoldLeftMouseButton = true;
     }
 
     private void OnRightMouseClick(InputAction.CallbackContext context)
@@ -217,11 +235,11 @@ public class PlayerControlSystem : MonoBehaviour
     {
         var delay = new WaitForEndOfFrame();
         //_isWork = true;
-        _states |= PlayerControlStates.FrameStretching;
+        //_states |= PlayerControlStates.FrameStretching;
+        _states.FrameStretching = true;
 
         //while (_isWork)
-        while ((_states & PlayerControlStates.FrameStretching) == PlayerControlStates.FrameStretching &&
-            (_states & PlayerControlStates.HoldLeftMouseButton) == PlayerControlStates.HoldLeftMouseButton)
+        while (_states.FrameStretching && _states.HoldLeftMouseButton)
         {
             yield return delay;
             Rect rect = new Rect(_startPos, _frameSize);                                                          // Вынести cоздание rect из цикла
@@ -234,20 +252,21 @@ public class PlayerControlSystem : MonoBehaviour
                 if (rect.Contains(screenPosition))
                 {
                     //if (_isPresedCtrl == false)
-                    if ((_states & PlayerControlStates.PresedCtrl) != PlayerControlStates.PresedCtrl)
+                    if (_states.PresedCtrl == false)
                         Select(allBots[i]);
                     else
                         Unselect(allBots[i]);
                 }
-                //else if (_isPresedCtrl == false)
-                else if ((_states & PlayerControlStates.PresedCtrl) != PlayerControlStates.PresedCtrl)
+                else if (_states.PresedCtrl == false)
+                //else if ((_states & PlayerControlStates.PresedCtrl) != PlayerControlStates.PresedCtrl)
                 {
                     Unselect(allBots[i]);
                 }
             }
         }
 
-        _states ^= PlayerControlStates.FrameStretching;
+        //_states ^= PlayerControlStates.FrameStretching;
+        _states.FrameStretching = false;
         _frameStretching = null;
     }
 }

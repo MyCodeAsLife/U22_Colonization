@@ -33,6 +33,13 @@ public class BuildingPlacer : MonoBehaviour
         _cellSize.Change -= fun;
     }
 
+    public void CreateBuilding(Building prefab)                                     // Остановился здесь
+    {
+        _flyingBuilding = Instantiate(prefab);                                      // В качестве родителя делать MainCanvas
+
+        _controlSysytem.InputActions.Mouse.Delta.started += OnMouseMove;            // Включаем перемещение объекта за курсором мыши
+    }
+
     private void OnMouseLeftButtonClick(InputAction.CallbackContext context)                // Доработать, есть логические ошибки
     {
         //if (_flyingBuilding == null)

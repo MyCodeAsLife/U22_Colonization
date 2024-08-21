@@ -1,11 +1,7 @@
-using System;
-
-[Flags]
-public enum PlayerControlStates
+public struct PlayerControlStates
 {
-    None                 = 0,
-    FrameStretching      = 1 << 0,
-    MouseMove            = 1 << 1,
-    PresedCtrl           = 1 << 2,
-    HoldLeftMouseButton  = 1 << 3,
+    public bool FrameStretching;
+    public bool MouseMove;
+    public bool PresedCtrl;
+    public bool HoldLeftMouseButton;
 }

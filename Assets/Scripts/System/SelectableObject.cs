@@ -4,6 +4,9 @@ public class SelectableObject : MonoBehaviour
 {
     protected Transform _prefabSelectionIndicator;
     protected Transform _selectionIndicator;
+    //protected AmountOfResources SelfPrice;
+
+    //public AmountOfResources Price { get { return SelfPrice; } }
 
     protected virtual void Awake()
     {

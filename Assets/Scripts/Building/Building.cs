@@ -4,9 +4,9 @@ public class Building : SelectableObject
 {
     private BuildingPlacer _buildingPlacer;
     private Vector3 _square;
+
     protected Vector3 SelfSize;
 
-    public int Price { get; protected set; }
     public Vector3 Size { get { return SelfSize; } }
 
     protected override void Awake()

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -13,11 +14,14 @@ public class BuildingPanelUI : MonoBehaviour
     private Coroutine _swimming;
     private BuildingPlacer _buildingPlacer;
     private GameObject _buildingPlacerPrefab;
+    //private IList<OrderButton> _orderButtons;
+    private OrderButton[] _orderButtons;
+
     //private MainBaseAI _selectBuilding;
 
-    private void Awake()
+    private void Awake()                                // +++++++++
     {
-
+        _orderButtons = GetComponentsInChildren<OrderButton>();
     }
 
     private void Start()
@@ -45,6 +49,12 @@ public class BuildingPanelUI : MonoBehaviour
         mainBase.FoodQuantityChanged += OnChangeNumberOfFood;
         mainBase.TimberQuantityChanged += OnChangeNumberOfTimber;
         mainBase.MarbleQuantityChanged += OnChangeNumberOfMarble;
+
+        //Debug.Log("LinkBase");                                                                  // +++++++++++++
+
+        for (int i = 0; i < _orderButtons.Length; i++)
+            _orderButtons[i].SetCustomer(mainBase);
+
         ShowPanel();
     }
 
@@ -78,9 +88,11 @@ public class BuildingPanelUI : MonoBehaviour
 
     private void ChangeResourcesNumber(MainBaseAI mainBase)
     {
-        OnChangeNumberOfFood(mainBase.NumberOfFood);
-        OnChangeNumberOfTimber(mainBase.NumberOfTimber);
-        OnChangeNumberOfMarble(mainBase.NumberOfMarble);
+        AmountOfResources amountOfResources = mainBase.AmountOfResources;
+
+        OnChangeNumberOfFood(amountOfResources.Food);
+        OnChangeNumberOfTimber(amountOfResources.Timber);
+        OnChangeNumberOfMarble(amountOfResources.Marble);
     }
 
     private IEnumerator SwimmingPanel(Vector3 targetPosition)

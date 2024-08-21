@@ -6,17 +6,19 @@ using UnityEngine;
 public class MainBaseAI : Building
 {
     [SerializeField] private Transform _gatheringPoint;
-    private BuildingPanelUI _buildingPanelUI;                                                   //+++++
+    [SerializeField] private int _maxCountCollectorBots;                         // +++++
 
+    private BuildingPanelUI _buildingPanelUI;                                                   //+++++
     private Transform _map;
     private Coroutine _resourceScaning;
     private ResourceScaner _resourceScaner;
     private CollectorBotAI _prefabCollectorBot;
 
-    private int _numberOfFood;
-    private int _numberOfTimber;
-    private int _numberOfMarble;
-    [SerializeField] private int _maxCountCollectorBots;                         // +++++
+    private IList<AmountOfResources> _priceList;
+    private AmountOfResources _amountOfResources;
+    //private int _numberOfFood;
+    //private int _numberOfTimber;
+    //private int _numberOfMarble;
 
     private IList<Resource> _freeResources;
     private IList<Resource> _resourcesPlannedForCollection;
@@ -27,9 +29,10 @@ public class MainBaseAI : Building
     public event Action<int> TimberQuantityChanged;
     public event Action<int> MarbleQuantityChanged;
 
-    public int NumberOfFood { get { return _numberOfFood; } }
-    public int NumberOfTimber { get { return _numberOfTimber; } }
-    public int NumberOfMarble { get { return _numberOfMarble; } }
+    public AmountOfResources AmountOfResources { get { return _amountOfResources; } }
+    //public int NumberOfFood { get { return _numberOfFood; } }
+    //public int NumberOfTimber { get { return _numberOfTimber; } }
+    //public int NumberOfMarble { get { return _numberOfMarble; } }
 
     protected override void OnDisable()
     {
@@ -42,19 +45,14 @@ public class MainBaseAI : Building
     protected override void Start()
     {
         base.Start();
-        _buildingPanelUI = FindFirstObjectByType<BuildingPanelUI>();
-        _map = GameObject.FindGameObjectWithTag("Map").transform;                                // Magical ???
-        _selectionIndicator.localScale = Vector3.one * 0.5f;                                // Magical ???
-        _resourceScaner = new ResourceScaner(_map);
-        _prefabCollectorBot = Resources.Load<CollectorBotAI>("Prefabs/CollectorBot");
-        //_maxCountCollectorBots = 0;
-        _freeResources = new List<Resource>();
-        _resourcesPlannedForCollection = new List<Resource>();
-        _poolOfWorkingCollectorBots = new List<CollectorBotAI>();
-        _poolOfIdleCollectorBots = new List<CollectorBotAI>();
+        StartInicialization();
+    }
 
-        _resourceScaning = StartCoroutine(ResourceScanning());
-        StartCoroutine(StartInitialization());
+    public void SubtarctResources(AmountOfResources amount)      // Проверки на кол-во, чтобы не уйти в минус
+    {
+        _amountOfResources.Food -= amount.Food;
+        _amountOfResources.Timber -= amount.Timber;
+        _amountOfResources.Marble -= amount.Marble;
     }
 
     public void StoreResource(ResourceType resourceType)
@@ -69,18 +67,21 @@ public class MainBaseAI : Building
         switch (resourceType)
         {
             case ResourceType.Food:
-                _numberOfFood++;
-                FoodQuantityChanged?.Invoke(_numberOfFood);
+                //_numberOfFood++;
+                _amountOfResources.Food++;
+                FoodQuantityChanged?.Invoke(_amountOfResources.Food);
                 break;
 
             case ResourceType.Timber:
-                _numberOfTimber++;
-                TimberQuantityChanged?.Invoke(_numberOfTimber);
+                //_numberOfTimber++;
+                _amountOfResources.Timber++;
+                TimberQuantityChanged?.Invoke(_amountOfResources.Timber);
                 break;
 
             case ResourceType.Marble:
-                _numberOfMarble++;
-                MarbleQuantityChanged?.Invoke(_numberOfMarble);
+                //_numberOfMarble++;
+                _amountOfResources.Marble++;
+                MarbleQuantityChanged?.Invoke(_amountOfResources.Marble);
                 break;
         }
     }
@@ -95,6 +96,56 @@ public class MainBaseAI : Building
     {
         base.UnSelect();
         _buildingPanelUI.UnLinkBase(this);
+    }
+
+    public AmountOfResources GetPriceOf(SelectableObject obj)
+    {
+        if (obj is MainBaseAI)
+            return _priceList[0];
+        else if (obj is Barack)
+            return _priceList[1];
+        else
+            return _priceList[0];
+    }
+
+    //private bool Implements<T>(this object Object) => Object is T;                              // Для Price листа
+
+    private void StartInicialization()
+    {
+        _priceList = new List<AmountOfResources>();
+        _buildingPanelUI = FindFirstObjectByType<BuildingPanelUI>();
+        _map = GameObject.FindGameObjectWithTag("Map").transform;                               // Magical ???
+        _selectionIndicator.localScale = Vector3.one * 0.5f;                                    // Magical ???
+        _resourceScaner = new ResourceScaner(_map);
+        _prefabCollectorBot = Resources.Load<CollectorBotAI>("Prefabs/CollectorBot");
+        //_maxCountCollectorBots = 0;
+        _freeResources = new List<Resource>();
+        _resourcesPlannedForCollection = new List<Resource>();
+        _poolOfWorkingCollectorBots = new List<CollectorBotAI>();
+        _poolOfIdleCollectorBots = new List<CollectorBotAI>();
+
+        StartPriceList();
+        _resourceScaning = StartCoroutine(ResourceScanning());
+        StartCoroutine(StartInitialization());
+    }
+
+    private void StartPriceList()
+    {
+        AmountOfResources mainbase = new AmountOfResources();
+        mainbase.Food = 1;
+        mainbase.Timber = 1;
+        mainbase.Marble = 1;
+        _priceList.Add(mainbase);
+        AmountOfResources baracks = new AmountOfResources();
+        baracks.Food = 1;
+        baracks.Timber = 1;
+        baracks.Marble = 1;
+        _priceList.Add(baracks);
+        AmountOfResources bot = new AmountOfResources();
+        bot.Food = 1;
+        bot.Timber = 1;
+        bot.Marble = 0;
+        _priceList.Add(bot);
     }
 
     private void OnCollectorBotTaskCompleted(CollectorBotAI bot)

@@ -1,26 +1,30 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(PlayerControlSystem))]
 public class BuildingPlacer : MonoBehaviour
 {
-    private SingleReactiveProperty<float> _cellSize = new();
+    private SingleReactiveProperty<float> _cellSize = new();                            // На него вообще ктото подписан?
     private PlayerControlSystem _controlSysytem;
     [SerializeField] private Building _flyingBuilding;                                   // ++++++++++++
+    private Dictionary<Vector2Int, Building> _buildingsPositions = new();
+    private int _roundPosX;
+    private int _roundPosZ;
+    private bool _canBePlaced;
 
     public float CellSize { get { return _cellSize.Value; } }
 
     private void Awake()
     {
         _cellSize.Value = 1f;
+        _canBePlaced = true;
     }
 
     private void Start()
     {
         _controlSysytem = GetComponent<PlayerControlSystem>();
-        //_controlSysytem.InputActions.Mouse.LeftButtonClick.performed += OnMouseLeftButtonClick;
-        //_controlSysytem.InputActions.Mouse.Delta.started += OnMouseMove;                                                    //+++++++++++++
     }
 
     public void SubscribeOnCellSizeChanged(Action<float> fun)
@@ -33,39 +37,85 @@ public class BuildingPlacer : MonoBehaviour
         _cellSize.Change -= fun;
     }
 
-    public void CreateBuilding(Building prefab)                                     // Остановился здесь
+    public void CreateBuilding(Building prefab)
     {
-        _flyingBuilding = Instantiate(prefab);                                      // В качестве родителя делать MainCanvas
-
-        _controlSysytem.InputActions.Mouse.Delta.started += OnMouseMove;            // Включаем перемещение объекта за курсором мыши
+        var parent = GameObject.FindGameObjectWithTag("ResourceSpawner").transform.parent;      //++++++++++++++
+        _flyingBuilding = Instantiate(prefab, parent);                                      // В качестве родителя делать MainCanvas
+        MoveBuilding();
+        _controlSysytem.InputActions.Mouse.Delta.started += OnMouseMove;
+        _controlSysytem.InputActions.Mouse.LeftButtonClick.performed += OnMouseLeftButtonClick;
     }
 
-    private void OnMouseLeftButtonClick(InputAction.CallbackContext context)                // Доработать, есть логические ошибки
+    private void OnMouseLeftButtonClick(InputAction.CallbackContext context)
     {
-        //if (_flyingBuilding == null)
-        //{
-        //    _controlSysytem.InputActions.Mouse.Delta.started += OnMouseMove;
-        //}
-        //else
-        //{
-        //    _flyingBuilding = null;
-        //    _controlSysytem.InputActions.Mouse.Delta.started -= OnMouseMove;
-        //}
-
-        if (_flyingBuilding != null)
+        if (_flyingBuilding != null && _canBePlaced)
         {
+            RecordLocationBuilding(new Vector2Int(_roundPosX, _roundPosZ), _flyingBuilding);
             _flyingBuilding = null;
             _controlSysytem.InputActions.Mouse.Delta.started -= OnMouseMove;
+            _controlSysytem.InputActions.Mouse.LeftButtonClick.performed -= OnMouseLeftButtonClick;
         }
+    }
+
+    private void MoveBuilding()
+    {
+        Vector3 point = _controlSysytem.GetRaycastPoint() / _cellSize.Value;
+        _roundPosX = Mathf.RoundToInt(point.x);
+        _roundPosZ = Mathf.RoundToInt(point.z);
+        _flyingBuilding.transform.position = new Vector3(_roundPosX, 0, _roundPosZ) * _cellSize.Value;
     }
 
     private void OnMouseMove(InputAction.CallbackContext context)
     {
-        Vector3 point = _controlSysytem.GetRaycastPoint() / _cellSize.Value;
+        MoveBuilding();
+        bool chaeckAllowPosition = CheckAllowPosition(new Vector2Int(_roundPosX, _roundPosZ), _flyingBuilding);
 
-        int x = Mathf.RoundToInt(point.x);
-        int z = Mathf.RoundToInt(point.z);
+        if (_canBePlaced != chaeckAllowPosition)
+        {
+            _canBePlaced = chaeckAllowPosition;
 
-        _flyingBuilding.transform.position = new Vector3(x, 0, z) * _cellSize.Value;
+            if (_canBePlaced)
+            {
+                _flyingBuilding.DisplayValidPosition();
+            }
+            else
+            {
+                _flyingBuilding.DisplayInvalidPosition();
+            }
+        }
+    }
+
+    private void RecordLocationBuilding(Vector2Int position, Building building)     // Нужно ли передавать данные в функцию
+    {
+        int posX = position.x - (int)(building.Size.x * 0.5f);                          // Дублирование
+        int posZ = position.y - (int)(building.Size.z * 0.5f);                          // Дублирование
+
+        for (int x = 0; x < building.Size.x; x++)
+        {
+            for (int z = 0; z < building.Size.z; z++)
+            {
+                Vector2Int cellPosition = new Vector2Int(posX + x, posZ + z);                          // Дублирование?
+                _buildingsPositions.Add(cellPosition, _flyingBuilding);
+            }
+        }
+    }
+
+    private bool CheckAllowPosition(Vector2Int position, Building building)     // Нужно ли передавать данные в функцию
+    {
+        int posX = position.x - (int)(building.Size.x * 0.5f);                          // Дублирование
+        int posZ = position.y - (int)(building.Size.z * 0.5f);                          // Дублирование
+
+        for (int x = 0; x < building.Size.x; x++)
+        {
+            for (int z = 0; z < building.Size.z; z++)
+            {
+                Vector2Int cellPosition = new Vector2Int(posX + x, posZ + z);                          // Дублирование?
+
+                if (_buildingsPositions.ContainsKey(cellPosition))
+                    return false;
+            }
+        }
+
+        return true;
     }
 }

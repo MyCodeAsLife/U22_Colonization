@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Resource
   - Map
+  - ResourceSpawner
   layers:
   - Default
   - TransparentFX

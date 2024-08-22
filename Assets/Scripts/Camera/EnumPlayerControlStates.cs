@@ -4,4 +4,5 @@ public struct PlayerControlStates
     public bool MouseMove;
     public bool PresedCtrl;
     public bool HoldLeftMouseButton;
+    public bool CursoreOverUI;
 }

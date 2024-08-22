@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -46,9 +45,9 @@ public class BuildingPanelUI : MonoBehaviour
     {
         //_selectBuilding = mainBase;
         ChangeResourcesNumber(mainBase);
-        mainBase.FoodQuantityChanged += OnChangeNumberOfFood;
-        mainBase.TimberQuantityChanged += OnChangeNumberOfTimber;
-        mainBase.MarbleQuantityChanged += OnChangeNumberOfMarble;
+        mainBase.Store.FoodQuantityChanged += OnChangeNumberOfFood;
+        mainBase.Store.TimberQuantityChanged += OnChangeNumberOfTimber;
+        mainBase.Store.MarbleQuantityChanged += OnChangeNumberOfMarble;
 
         //Debug.Log("LinkBase");                                                                  // +++++++++++++
 
@@ -61,9 +60,9 @@ public class BuildingPanelUI : MonoBehaviour
     public void UnLinkBase(MainBaseAI mainBase)
     {
         HidePanel();
-        mainBase.FoodQuantityChanged -= OnChangeNumberOfFood;
-        mainBase.TimberQuantityChanged -= OnChangeNumberOfTimber;
-        mainBase.MarbleQuantityChanged -= OnChangeNumberOfMarble;
+        mainBase.Store.FoodQuantityChanged -= OnChangeNumberOfFood;
+        mainBase.Store.TimberQuantityChanged -= OnChangeNumberOfTimber;
+        mainBase.Store.MarbleQuantityChanged -= OnChangeNumberOfMarble;
         //_selectBuilding = null;
     }
 
@@ -88,7 +87,7 @@ public class BuildingPanelUI : MonoBehaviour
 
     private void ChangeResourcesNumber(MainBaseAI mainBase)
     {
-        AmountOfResources amountOfResources = mainBase.AmountOfResources;
+        AmountOfResources amountOfResources = mainBase.Store.GetAmountOfResources();
 
         OnChangeNumberOfFood(amountOfResources.Food);
         OnChangeNumberOfTimber(amountOfResources.Timber);

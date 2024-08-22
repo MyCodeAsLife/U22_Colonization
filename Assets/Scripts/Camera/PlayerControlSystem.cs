@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-//using System.Numerics;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -16,10 +15,6 @@ public class PlayerControlSystem : MonoBehaviour
     private CameraMover _cameraMover;
     private BuildingPlacer _buildingPlacer;
     private Plane _plane;
-    //private bool _isPresedCtrl;                         // Состояние
-    //private bool _isHoldLeftMouseButton;                // Состояние
-    //private bool _isMouseMove;                          // Состояние
-    //private bool _isWork;                               // Состояние
     private PlayerControlStates _states = new();
     private Ray _ray;
     private RaycastHit _hit = new();
@@ -33,15 +28,12 @@ public class PlayerControlSystem : MonoBehaviour
     private Vector2 _frameSize;
     private Coroutine _frameStretching;
 
-    //public Ray Ray { get { return _ray; } }
     public MainInputActions InputActions { get { return _inputActions; } }
-    //public SelectableObject SelectableBuilding { get { return _listOfSelected[0]; } }
 
     private void Awake()
     {
         _plane = new Plane(Vector3.up, Vector3.zero);
         _inputActions = new MainInputActions();
-        //_buildingPlacer = transform.AddComponent<BuildingPlacer>();
     }
 
     private void OnEnable()
@@ -54,8 +46,6 @@ public class PlayerControlSystem : MonoBehaviour
         _inputActions.Keyboard.Ctrl.started += OnPressCtrl;
         _inputActions.Keyboard.Ctrl.canceled += OnReleaseCtrl;
         _cameraMover = new CameraMover(this, _inputActions);
-        //_buildingPlacer.SetControlSystem(this);
-        //_buildingPlacer.SetInputActions(_inputActions);
     }
 
     private void OnDisable()
@@ -76,26 +66,10 @@ public class PlayerControlSystem : MonoBehaviour
         _uiMask = LayerMask.NameToLayer("UI");
     }
 
-    //private void Update()
-    //{
-    //    DoNotClickUIAndGameAtSameTime();
-    //}
-
-    //private void DoNotClickUIAndGameAtSameTime()
-    //{
-    //    if (EventSystem.current.IsPointerOverGameObject())
-    //    {
-    //        _inputActions.Mouse.Disable();
-    //    }
-    //    else
-    //    {
-    //        _inputActions.Mouse.Enable();
-    //    }
-    //}
-
     private void LateUpdate()
     {
         _ray = Camera.main.ScreenPointToRay(Input.mousePosition);                   // Необходимо каждый раз получать новый луч
+        _states.CursoreOverUI = EventSystem.current.IsPointerOverGameObject();
 
         if (Physics.Raycast(_ray.origin, _ray.direction, out _hit, 100/*, _selectionMask*/ /*^ int.MaxValue*/))    // Отказывается адекватно воспринимать маску
         {
@@ -122,13 +96,8 @@ public class PlayerControlSystem : MonoBehaviour
         }
     }
 
-    //private void OnLeftMouseHold(InputAction.CallbackContext context) => _isHoldLeftMouseButton = true;
-    //private void OnReleaseCtrl(InputAction.CallbackContext context) => _isPresedCtrl = false;
-    //private void OnPressCtrl(InputAction.CallbackContext context) => _isPresedCtrl = true;
-
-    public Vector3 GetRaycastPoint()                                           // Вынести в Control System
+    public Vector3 GetRaycastPoint()
     {
-        //_ray = _playerControlSystem.Ray;
         _plane.Raycast(_ray, out float distance);
         return _ray.GetPoint(distance);
     }
@@ -140,11 +109,9 @@ public class PlayerControlSystem : MonoBehaviour
     {
         if (_states.HoldLeftMouseButton)
         {
-            //Debug.Log((_states & PlayerControlStates.HoldLeftMouseButton) == PlayerControlStates.HoldLeftMouseButton);              //++++++++
-            Vector2 endPos;
             _cursoreCurrentPosition = Input.mousePosition;
             _startPos = Vector2.Min(_cursoreStartPosition, _cursoreCurrentPosition);
-            endPos = Vector2.Max(_cursoreStartPosition, _cursoreCurrentPosition);
+            Vector2 endPos = Vector2.Max(_cursoreStartPosition, _cursoreCurrentPosition);
             _frameImage.rectTransform.anchoredPosition = _startPos;
             _frameSize = endPos - _startPos;
             _frameImage.rectTransform.sizeDelta = _frameSize;
@@ -156,20 +123,15 @@ public class PlayerControlSystem : MonoBehaviour
 
     private void OnLeftMouseSlowTap(InputAction.CallbackContext context)
     {
-        //_isWork = false;
-        //Debug.Log("SlowTap1:" + ((_states & PlayerControlStates.HoldLeftMouseButton) == PlayerControlStates.HoldLeftMouseButton)); //+++++++++++++
         _states.HoldLeftMouseButton = false;
-        //_states ^= PlayerControlStates.Frame;
         _frameImage.enabled = false;
-        //Debug.Log("SlowTap2:" + ((_states & PlayerControlStates.HoldLeftMouseButton) == PlayerControlStates.HoldLeftMouseButton)); //+++++++++++++
     }
 
     private void OnLeftMousePress(InputAction.CallbackContext context)
     {
-        if (EventSystem.current.IsPointerOverGameObject())     // Если нажали по UI то ничего не делать
+        if (_states.CursoreOverUI)                                  // Если нажали по UI то ничего не делать
             return;
 
-        //if (_isPresedCtrl == false && _isHoldLeftMouseButton == false)
         if (_states.PresedCtrl == false && _states.HoldLeftMouseButton == false)
         {
             UnselectAll();
@@ -234,11 +196,8 @@ public class PlayerControlSystem : MonoBehaviour
     private IEnumerator ObjectsSelecting()               // Переименовать метод выделения
     {
         var delay = new WaitForEndOfFrame();
-        //_isWork = true;
-        //_states |= PlayerControlStates.FrameStretching;
         _states.FrameStretching = true;
 
-        //while (_isWork)
         while (_states.FrameStretching && _states.HoldLeftMouseButton)
         {
             yield return delay;
@@ -251,21 +210,18 @@ public class PlayerControlSystem : MonoBehaviour
 
                 if (rect.Contains(screenPosition))
                 {
-                    //if (_isPresedCtrl == false)
                     if (_states.PresedCtrl == false)
                         Select(allBots[i]);
                     else
                         Unselect(allBots[i]);
                 }
                 else if (_states.PresedCtrl == false)
-                //else if ((_states & PlayerControlStates.PresedCtrl) != PlayerControlStates.PresedCtrl)
                 {
                     Unselect(allBots[i]);
                 }
             }
         }
 
-        //_states ^= PlayerControlStates.FrameStretching;
         _states.FrameStretching = false;
         _frameStretching = null;
     }

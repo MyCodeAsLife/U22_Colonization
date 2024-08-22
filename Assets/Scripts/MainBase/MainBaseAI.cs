@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,31 +7,20 @@ public class MainBaseAI : Building
     [SerializeField] private Transform _gatheringPoint;
     [SerializeField] private int _maxCountCollectorBots;                         // +++++
 
-    private BuildingPanelUI _buildingPanelUI;                                                   //+++++
     private Transform _map;
+    private Store _store = new();
     private Coroutine _resourceScaning;
+    private BuildingPanelUI _buildingPanelUI;                                                   //+++++
     private ResourceScaner _resourceScaner;
     private CollectorBotAI _prefabCollectorBot;
 
-    private IList<AmountOfResources> _priceList;
-    private AmountOfResources _amountOfResources;
-    //private int _numberOfFood;
-    //private int _numberOfTimber;
-    //private int _numberOfMarble;
-
+    private IList<CollectorBotAI> _poolOfIdleCollectorBots;
+    private IList<CollectorBotAI> _poolOfWorkingCollectorBots;
     private IList<Resource> _freeResources;
     private IList<Resource> _resourcesPlannedForCollection;
-    private IList<CollectorBotAI> _poolOfWorkingCollectorBots;
-    private IList<CollectorBotAI> _poolOfIdleCollectorBots;
+    private IList<AmountOfResources> _priceList;
 
-    public event Action<int> FoodQuantityChanged;
-    public event Action<int> TimberQuantityChanged;
-    public event Action<int> MarbleQuantityChanged;
-
-    public AmountOfResources AmountOfResources { get { return _amountOfResources; } }
-    //public int NumberOfFood { get { return _numberOfFood; } }
-    //public int NumberOfTimber { get { return _numberOfTimber; } }
-    //public int NumberOfMarble { get { return _numberOfMarble; } }
+    public IStore Store { get { return _store; } }
 
     protected override void OnDisable()
     {
@@ -48,11 +36,11 @@ public class MainBaseAI : Building
         StartInicialization();
     }
 
-    public void SubtarctResources(AmountOfResources amount)      // Проверки на кол-во, чтобы не уйти в минус
+    public void SubtarctResources(AmountOfResources amount)                 // Перенести в Store?
     {
-        _amountOfResources.Food -= amount.Food;
-        _amountOfResources.Timber -= amount.Timber;
-        _amountOfResources.Marble -= amount.Marble;
+        _store.ReduceFood(amount.Food);
+        _store.ReduceTimber(amount.Timber);
+        _store.ReduceMarble(amount.Marble);
     }
 
     public void StoreResource(ResourceType resourceType)
@@ -67,21 +55,15 @@ public class MainBaseAI : Building
         switch (resourceType)
         {
             case ResourceType.Food:
-                //_numberOfFood++;
-                _amountOfResources.Food++;
-                FoodQuantityChanged?.Invoke(_amountOfResources.Food);
+                _store.AddFood(1);
                 break;
 
             case ResourceType.Timber:
-                //_numberOfTimber++;
-                _amountOfResources.Timber++;
-                TimberQuantityChanged?.Invoke(_amountOfResources.Timber);
+                _store.AddTimber(1);
                 break;
 
             case ResourceType.Marble:
-                //_numberOfMarble++;
-                _amountOfResources.Marble++;
-                MarbleQuantityChanged?.Invoke(_amountOfResources.Marble);
+                _store.AddMarble(1);
                 break;
         }
     }
@@ -105,10 +87,8 @@ public class MainBaseAI : Building
         else if (obj is Barack)
             return _priceList[1];
         else
-            return _priceList[0];
+            return _priceList[2];
     }
-
-    //private bool Implements<T>(this object Object) => Object is T;                              // Для Price листа
 
     private void StartInicialization()
     {
@@ -151,8 +131,6 @@ public class MainBaseAI : Building
     private void OnCollectorBotTaskCompleted(CollectorBotAI bot)
     {
         _poolOfWorkingCollectorBots.Remove(bot);
-
-        //if (_poolOfIdleCollectorBots.Contains(bot) == false)
         _poolOfIdleCollectorBots.Add(bot);
     }
 

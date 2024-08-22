@@ -13,16 +13,24 @@ public class DisplayResourceUI : MonoBehaviour
     private void OnEnable()
     {
         _model = GetComponent<MainBaseAI>();
-        _model.FoodQuantityChanged += OnChangeNumberOfFood;
-        _model.TimberQuantityChanged += OnChangeNumberOfTimber;
-        _model.MarbleQuantityChanged += OnChangeNumberOfMarble;
+        //_model.FoodQuantityChanged += OnChangeNumberOfFood;
+        //_model.TimberQuantityChanged += OnChangeNumberOfTimber;
+        //_model.MarbleQuantityChanged += OnChangeNumberOfMarble;
+
+        _model.Store.FoodQuantityChanged += OnChangeNumberOfFood;
+        _model.Store.TimberQuantityChanged += OnChangeNumberOfTimber;
+        _model.Store.MarbleQuantityChanged += OnChangeNumberOfMarble;
     }
 
     private void OnDisable()
     {
-        _model.FoodQuantityChanged -= OnChangeNumberOfFood;
-        _model.TimberQuantityChanged -= OnChangeNumberOfTimber;
-        _model.MarbleQuantityChanged -= OnChangeNumberOfMarble;
+        //_model.FoodQuantityChanged -= OnChangeNumberOfFood;
+        //_model.TimberQuantityChanged -= OnChangeNumberOfTimber;
+        //_model.MarbleQuantityChanged -= OnChangeNumberOfMarble;
+
+        _model.Store.FoodQuantityChanged -= OnChangeNumberOfFood;
+        _model.Store.TimberQuantityChanged -= OnChangeNumberOfTimber;
+        _model.Store.MarbleQuantityChanged -= OnChangeNumberOfMarble;
     }
 
     private void Start()

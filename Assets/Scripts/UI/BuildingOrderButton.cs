@@ -6,7 +6,7 @@ public class BuildingOrder : OrderButton
     {
         AmountOfResources price = _currentBuilding.GetPriceOf(Prefab);
 
-        if (CheckPriceAvailability(_currentBuilding.AmountOfResources, price))
+        if (CheckPriceAvailability(_currentBuilding.Store.GetAmountOfResources(), price))
         {
             Debug.Log("Денег на здание достаточно.");                                 // ++++++++++++++++++++
             _currentBuilding.SubtarctResources(price);

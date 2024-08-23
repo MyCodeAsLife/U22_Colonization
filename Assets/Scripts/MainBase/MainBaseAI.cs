@@ -10,15 +10,17 @@ public class MainBaseAI : Building
     private Transform _map;
     private Store _store = new();
     private Coroutine _resourceScaning;
-    private BuildingPanelUI _buildingPanelUI;                                                   //+++++
     private ResourceScaner _resourceScaner;
+    private BuildingPanelUI _buildingPanelUI;                                                   //+++++
     private CollectorBotAI _prefabCollectorBot;
 
-    private IList<CollectorBotAI> _poolOfIdleCollectorBots;
-    private IList<CollectorBotAI> _poolOfWorkingCollectorBots;
-    private IList<Resource> _freeResources;
-    private IList<Resource> _resourcesPlannedForCollection;
-    private IList<AmountOfResources> _priceList;
+    private List<Task> _taskPool = new();
+    private List<Task> _issueTasks = new();
+    private List<AmountOfResources> _priceList = new();
+    private List<CollectorBotAI> _poolOfIdleCollectorBots = new();
+    private List<CollectorBotAI> _poolOfWorkingCollectorBots = new();
+    //private IList<Resource> _freeResources;
+    //private IList<Resource> _resourcesPlannedForCollection;
 
     public IStore Store { get { return _store; } }
 
@@ -45,12 +47,12 @@ public class MainBaseAI : Building
 
     public void StoreResource(ResourceType resourceType)
     {
-        for (int i = 0; i < _resourcesPlannedForCollection.Count; ++i)
-            if (_resourcesPlannedForCollection[i].ResourceType == resourceType)
-            {
-                _resourcesPlannedForCollection.RemoveAt(i);
-                break;
-            }
+        //for (int i = 0; i < _resourcesPlannedForCollection.Count; ++i)
+        //    if (_resourcesPlannedForCollection[i].ResourceType == resourceType)
+        //    {
+        //        _resourcesPlannedForCollection.RemoveAt(i);
+        //        break;
+        //    }
 
         switch (resourceType)
         {
@@ -80,7 +82,7 @@ public class MainBaseAI : Building
         _buildingPanelUI.UnLinkBase(this);
     }
 
-    public AmountOfResources GetPriceOf(SelectableObject obj)
+    public AmountOfResources GetPriceOf(SelectableObject obj)                       // Вынести в отдельную сущность
     {
         if (obj is MainBaseAI)
             return _priceList[0];
@@ -90,26 +92,52 @@ public class MainBaseAI : Building
             return _priceList[2];
     }
 
+    public void CreateCollectorBot()
+    {
+        var collectorBot = Instantiate<CollectorBotAI>(_prefabCollectorBot);
+        collectorBot.TaskCompleted += OnCollectorBotTaskCompleted;
+        collectorBot.transform.position = transform.position;
+        collectorBot.transform.SetParent(transform.parent);
+        collectorBot.SetBaseAffiliation(this);
+        collectorBot.GoTo(_gatheringPoint.position);
+        _poolOfIdleCollectorBots.Add(collectorBot);
+    }
+
+    private void OnTaskCompleted(Task task)
+    {
+        if (_taskPool.Contains(task))
+        {
+            _taskPool.Remove(task);
+            task.Completed -= OnTaskCompleted;
+        }
+        else if (_issueTasks.Contains(task))
+        {
+            _issueTasks.Remove(task);
+            task.Completed -= OnTaskCompleted;
+        }
+    }
+
     private void StartInicialization()
     {
-        _priceList = new List<AmountOfResources>();
+        //_priceList = new List<AmountOfResources>();
         _buildingPanelUI = FindFirstObjectByType<BuildingPanelUI>();
         _map = GameObject.FindGameObjectWithTag("Map").transform;                               // Magical ???
         _selectionIndicator.localScale = Vector3.one * 0.5f;                                    // Magical ???
         _resourceScaner = new ResourceScaner(_map);
         _prefabCollectorBot = Resources.Load<CollectorBotAI>("Prefabs/CollectorBot");
         //_maxCountCollectorBots = 0;
-        _freeResources = new List<Resource>();
-        _resourcesPlannedForCollection = new List<Resource>();
-        _poolOfWorkingCollectorBots = new List<CollectorBotAI>();
-        _poolOfIdleCollectorBots = new List<CollectorBotAI>();
+        //_freeResources = new List<Resource>();
+        //_resourcesPlannedForCollection = new List<Resource>();
+        //_taskPool = new List<Task>();
+        //_poolOfWorkingCollectorBots = new List<CollectorBotAI>();
+        //_poolOfIdleCollectorBots = new List<CollectorBotAI>();
 
         StartPriceList();
         _resourceScaning = StartCoroutine(ResourceScanning());
         StartCoroutine(StartInitialization());
     }
 
-    private void StartPriceList()
+    private void StartPriceList()                                                       // Прайс лист вынести в отдельную сущность
     {
         AmountOfResources mainbase = new AmountOfResources();
         mainbase.Food = 1;
@@ -134,14 +162,44 @@ public class MainBaseAI : Building
         _poolOfIdleCollectorBots.Add(bot);
     }
 
-    private void FindFreeResources()
+    private void FindFreeResources()                                // переделать для корректной работы с несколькими независимыми базами на карте
     {
         IList<Resource> allResources = _resourceScaner.MapScaning();
 
-        foreach (var resource in allResources)
-            if (_freeResources.Contains(resource) == false)
-                if (_resourcesPlannedForCollection.Contains(resource) == false)
-                    _freeResources.Add(resource);
+        //foreach (var resource in allResources)
+        //    if (_freeResources.Contains(resource) == false)
+        //        if (_resourcesPlannedForCollection.Contains(resource) == false)
+        //            _freeResources.Add(resource);
+
+        for (int i = 0; i < allResources.Count; i++)
+        {
+            bool contains = false;
+
+            for (int j = 0; j < _taskPool.Count; j++)
+            {
+                if (_taskPool[j].Target == (SelectableObject)allResources[i])
+                {
+                    contains = true;
+                    break;
+                }
+            }
+
+            for (int j = 0; j < _issueTasks.Count; j++)
+            {
+                if (_issueTasks[j].Target == (SelectableObject)allResources[i])
+                {
+                    contains = true;
+                    break;
+                }
+            }
+
+            if (contains == false)
+            {
+                Task task = new Task(1, allResources[i]);               // Magic
+                task.Completed += OnTaskCompleted;
+                _taskPool.Add(task);
+            }
+        }
     }
 
     private void DistributeCollectionTasks()
@@ -150,26 +208,28 @@ public class MainBaseAI : Building
 
         while (isWork)
         {
-            if (_freeResources.Count < 1 || _poolOfIdleCollectorBots.Count < 1)
+            //if (_freeResources.Count < 1 || _poolOfIdleCollectorBots.Count < 1)
+            //    break;
+            if (_taskPool.Count < 1 || _poolOfIdleCollectorBots.Count < 1)
                 break;
+            // проверить на наличие строительных задач или создать пулл задач
 
-            _poolOfIdleCollectorBots[0].SetCollectionTask(_freeResources[0]);
-            _resourcesPlannedForCollection.Add(_freeResources[0]);
-            _freeResources.RemoveAt(0);
+            //_poolOfIdleCollectorBots[0].SetCollectionTask(_freeResources[0]);
+            //_resourcesPlannedForCollection.Add(_freeResources[0]);
+            //_freeResources.RemoveAt(0);
+
+            _poolOfIdleCollectorBots[0].SetCollectionTask(GetTask());
             _poolOfWorkingCollectorBots.Add(_poolOfIdleCollectorBots[0]);
             _poolOfIdleCollectorBots.RemoveAt(0);
         }
     }
 
-    private void CreateCollectorBot()
+    private Task GetTask()                      // Упразднить
     {
-        var collectorBot = Instantiate<CollectorBotAI>(_prefabCollectorBot);
-        collectorBot.TaskCompleted += OnCollectorBotTaskCompleted;
-        collectorBot.transform.position = transform.position;
-        collectorBot.transform.SetParent(transform.parent);
-        collectorBot.SetBaseAffiliation(this);
-        collectorBot.GoTo(_gatheringPoint.position);
-        _poolOfIdleCollectorBots.Add(collectorBot);
+        Task task = _taskPool[0];
+        _issueTasks.Add(task);
+        _taskPool.RemoveAt(0);
+        return task;
     }
 
     private IEnumerator ResourceScanning()
@@ -182,7 +242,7 @@ public class MainBaseAI : Building
             yield return new WaitForSeconds(Delay);
             FindFreeResources();
 
-            if (_freeResources.Count > 0 && _poolOfIdleCollectorBots.Count > 0)
+            if (_freeResources.Count > 0 && _poolOfIdleCollectorBots.Count > 0)             // Это заменить на пулл задач где запрос задачь будут делать сами боты?
                 DistributeCollectionTasks();
         }
 

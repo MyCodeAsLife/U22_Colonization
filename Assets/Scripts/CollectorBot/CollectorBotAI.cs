@@ -6,33 +6,33 @@ using UnityEngine;
 public class CollectorBotAI : SelectableObject
 {
     private BotMover _mover;
-    [SerializeField] private Resource _resource;                                         //++++++++++
+    //[SerializeField] private SelectableObject _target;                                         //++++++++++
+    private Task _task;
     private MainBaseAI _mainBase;
-    private SingleReactiveProperty<float> _collectionProgress = new();
-    private Coroutine _collecting;
+    private Coroutine _action;
 
     private Vector3 _resourceAttachmentPoint;
     private bool _haveCollectedResource;
     private float _durationOfCollecting;
-    private int _resourceMask;
+    //private int _resourceMask;
     private int _interactableObjectMask;
 
-    public event Action CollectingStarted;
-    public event Action CollectingFinished;
+    public event Action ActionStarted;
+    public event Action ActionFinished;
     public event Action<CollectorBotAI> TaskCompleted;
 
     protected override void Awake()
     {
         base.Awake();
         _mover = transform.AddComponent<BotMover>();
-        _resourceMask = LayerMask.NameToLayer("Resource");
+        //_resourceMask = LayerMask.NameToLayer("Resource");
         _interactableObjectMask = LayerMask.NameToLayer("Interactable");
     }
 
     private void OnEnable()
     {
-        _resource = null;
-        _collecting = null;
+        //_target = null;
+        _action = null;
         _mover.MoveCompleted += OnMoveCompleted;
     }
 
@@ -43,8 +43,8 @@ public class CollectorBotAI : SelectableObject
 
         _mover.MoveCompleted -= OnMoveCompleted;
 
-        if (_collecting != null)
-            StopCoroutine(_collecting);
+        if (_action != null)
+            StopCoroutine(_action);
     }
 
     private void Start()
@@ -55,23 +55,23 @@ public class CollectorBotAI : SelectableObject
 
     public void GoTo(Vector3 point)
     {
-        if (_collecting != null)
+        if (_action != null)
         {
-            StopCoroutine(_collecting);
-            _collecting = null;
-            CollectingFinished?.Invoke();
+            StopCoroutine(_action);
+            _action = null;
+            ActionFinished?.Invoke();
         }
 
         _mover.Move(point);
     }
 
-    public void SetCollectionTask(Resource resource)
+    public void SetTask(Resource resource)                                              // Здесь==================================
     {
         if (_haveCollectedResource)
-            StoreResource();
+            StoreResource((Resource)_target);
 
-        _resource = resource;
-        _mover.Move(_resource.transform.position);
+        _target = resource;
+        _mover.Move(_target.transform.position);
     }
 
     public void SetBaseAffiliation(MainBaseAI mainBase)
@@ -79,73 +79,94 @@ public class CollectorBotAI : SelectableObject
         _mainBase = mainBase;
     }
 
-    public void SubscribeToCollectionProgress(Action<float> func)
+    public void SubscribeToActionProgress(Action<float> func)
     {
-        _collectionProgress.Change += func;
+        _actionProgress.Change += func;
     }
 
-    public void UnsubscribeToCollectionProgress(Action<float> func)
+    public void UnsubscribeToActionProgress(Action<float> func)
     {
-        _collectionProgress.Change -= func;
+        _actionProgress.Change -= func;
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)                 // Упростить. Получать задание в  виде ссылки на объект и при пиближении к нему сравнивать соприкоснувшийся с тем что получен по заданию
     {
-        if (_resource != null && other.gameObject.layer == _resourceMask)
+        if (other.gameObject.layer == _interactableObjectMask)                                  // Приделать состояние задач, и в зависимости от задачи к Action подключать нужную функцию
         {
-            if (other.GetComponent<Resource>() == _resource)
+            var obj = other.GetComponent<SelectableObject>();
+
+            if (obj is Resource && _haveCollectedResource == false && _target != null)              // Если задание на сбор
             {
-                _mover.Stop();
-                _collecting = StartCoroutine(Collecting());
+                if (Vector3.Distance(transform.position, _target.transform.position) < 5f)
+                {
+                    _mover.Stop();
+                    _action = StartCoroutine(Work(Collecting));
+                }
             }
-        }
-        else if (other.gameObject.layer == _interactableObjectMask && _haveCollectedResource)
-        {
-            if (other.GetComponent<MainBaseAI>() == _mainBase)
+            else if (obj is MainBaseAI && _haveCollectedResource)                                   // Если задание на перенос
             {
                 _mover.Stop();
-                StoreResource();
+                StoreResource((Resource)_target);
                 OnMoveCompleted();
             }
+            else if (obj is BuildingUnderConstruction)                                             // Если задание на строительство
+            {
+                _mover.Stop();
+                _action = StartCoroutine(Work(Constructing));
+            }
         }
     }
 
-    private void StoreResource()
+    private void StoreResource(Resource resource)
     {
         _haveCollectedResource = false;
-        _mainBase.StoreResource(_resource.ResourceType);
-        _resource.Delete();
-        _resource = null;
+        _mainBase.StoreResource(resource.ResourceType);
+        resource.Delete();
+        _target = null;
     }
 
     private void OnMoveCompleted()
     {
-        if (_resource == null)
+        if (_target == null)
             TaskCompleted?.Invoke(this);
-        else if (_haveCollectedResource == false && _resource != null)
-            GoTo(_resource.transform.position);
+        else if (_haveCollectedResource == false && _target != null)
+            GoTo(_target.transform.position);
         else
             GoTo(_mainBase.transform.position);
     }
 
-    private IEnumerator Collecting()
+    private void Collecting()
     {
-        CollectingStarted?.Invoke();
+        var resource = (Resource)_target;
+        _haveCollectedResource = true;
+        resource.transform.SetParent(transform);
+        resource.transform.localPosition = _resourceAttachmentPoint;
+        _mover.Move(_mainBase.transform.position);
+    }
+
+    private void Constructing()
+    {
+        var building = (BuildingUnderConstruction)_target;
+        // По завершению строительства у построеного здания вызвать завершающий метод в  BuildingUnderConstruction
+        building.CompleteConstruction();
+    }
+
+    private IEnumerator Work(Action action)             // Получать тип действия (в виде функции?)
+    {
+        ActionStarted?.Invoke();                        // Переименовать в Action
         float timer = 0;
 
-        while (timer < _durationOfCollecting)
+        while (timer < _durationOfCollecting)           // Переименовать в Action
         {
             yield return new WaitForEndOfFrame();
 
             timer += Time.deltaTime;
-            _collectionProgress.Value = timer / _durationOfCollecting;
+            _actionProgress.Value = timer / _durationOfCollecting;
         }
 
-        CollectingFinished?.Invoke();
-        _haveCollectedResource = true;
-        _resource.transform.SetParent(transform);
-        _resource.transform.localPosition = _resourceAttachmentPoint;
-        _mover.Move(_mainBase.transform.position);
-        _collecting = null;
+        action();
+        ActionFinished?.Invoke();
+        _action = null;
+        // Запрос нового задания
     }
 }

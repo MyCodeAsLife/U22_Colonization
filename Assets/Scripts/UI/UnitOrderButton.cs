@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class UnitOrder : OrderButton
 {
-    public override void TryBuy()                                                   // Описать что делать при заказе юнита
+    public override void TryBuy()
     {
         AmountOfResources price = _currentBuilding.GetPriceOf(Prefab);
 
@@ -10,7 +10,7 @@ public class UnitOrder : OrderButton
         {
             Debug.Log("Денег на юнит достаточно.");                                 // ++++++++++++++++++++
             _currentBuilding.SubtarctResources(price);
-            //Placer.CreateBuilding(Prefab.GetComponent<Building>());
+            _currentBuilding.CreateCollectorBot();
         }
         else
             Debug.Log("Денег на юнит нет.");                                        // ++++++++++++++++

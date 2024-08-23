@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class Resource : MonoBehaviour
+public class Resource : SelectableObject
 {
     [SerializeField] private ResourceType _resourceType;
 

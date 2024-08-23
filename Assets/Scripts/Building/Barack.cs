@@ -1,5 +1,9 @@
+using UnityEngine;
+
 public class Barack : Building
 {
+    [SerializeField] private int BoolShet;                                  // ++++++++++
+
     protected override void Start()
     {
         base.Start();

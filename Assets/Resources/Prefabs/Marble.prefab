@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3556941032057114740}
   - component: {fileID: 318250179148420959}
   - component: {fileID: 6490525338553447486}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: Marble
   m_TagString: Resource
   m_Icon: {fileID: 0}

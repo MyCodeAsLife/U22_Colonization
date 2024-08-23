@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1324194535899880177}
   - component: {fileID: 872472532934274812}
   - component: {fileID: 3133319000693289109}
-  m_Layer: 3
+  m_Layer: 6
   m_Name: Timber
   m_TagString: Resource
   m_Icon: {fileID: 0}

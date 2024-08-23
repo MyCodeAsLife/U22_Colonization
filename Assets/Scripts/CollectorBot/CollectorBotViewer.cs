@@ -17,30 +17,30 @@ public class CollectorBotViewer : MonoBehaviour
 
     private void OnDisable()
     {
-        _presenter.CollectingStarted -= OnStartCollection;
-        _presenter.CollectingFinished -= OnFinishCollection;
-        _presenter.UnsubscribeToCollectionProgress(OnCollectionProgress);
+        _presenter.ActionStarted -= OnStartAction;
+        _presenter.ActionFinished -= OnFinishAction;
+        _presenter.UnsubscribeToActionProgress(OnActionProgress);
     }
 
     private void Start()
     {
         _progressBar.gameObject.SetActive(false);
-        _presenter.CollectingStarted += OnStartCollection;
-        _presenter.CollectingFinished += OnFinishCollection;
-        _presenter.SubscribeToCollectionProgress(OnCollectionProgress);
+        _presenter.ActionStarted += OnStartAction;
+        _presenter.ActionFinished += OnFinishAction;
+        _presenter.SubscribeToActionProgress(OnActionProgress);
     }
 
-    public void OnCollectionProgress(float value)
+    public void OnActionProgress(float value)
     {
         _progressBar.value = value;
     }
 
-    private void OnStartCollection()
+    private void OnStartAction()
     {
         _progressBar.gameObject.SetActive(true);
     }
 
-    private void OnFinishCollection()
+    private void OnFinishAction()
     {
         _progressBar.gameObject.SetActive(false);
     }

@@ -1,6 +1,6 @@
 using System;
 
-public class Task : IComparable
+public class Task
 {
     public int Priority { get; private set; }
     public SelectableObject Target { get; private set; }

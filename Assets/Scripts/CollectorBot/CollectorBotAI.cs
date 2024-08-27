@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class CollectorBotAI : SelectableObject
 {
@@ -65,13 +66,22 @@ public class CollectorBotAI : SelectableObject
         _mover.Move(point);
     }
 
-    public void SetTask(Resource resource)                                              // Здесь==================================
+    //public void SetTask(Resource resource)                                              // Здесь==================================
+    //{
+    //    if (_haveCollectedResource)
+    //        StoreResource((Resource)_target);
+
+    //    _target = resource;
+    //    _mover.Move(_target.transform.position);
+    //}
+
+    public void SetTask(Task task)
     {
         if (_haveCollectedResource)
-            StoreResource((Resource)_target);
+            StoreResource(task.Target as Resource);
 
-        _target = resource;
-        _mover.Move(_target.transform.position);
+        _task = task;
+        _mover.Move(task.Target.transform.position);
     }
 
     public void SetBaseAffiliation(MainBaseAI mainBase)
@@ -95,9 +105,9 @@ public class CollectorBotAI : SelectableObject
         {
             var obj = other.GetComponent<SelectableObject>();
 
-            if (obj is Resource && _haveCollectedResource == false && _target != null)              // Если задание на сбор
+            if (obj is Resource && _haveCollectedResource == false && /*_target != null*/_task != null)              // Если задание на сбор
             {
-                if (Vector3.Distance(transform.position, _target.transform.position) < 5f)
+                if (Vector3.Distance(transform.position, _task.Target.transform.position) < 5f)
                 {
                     _mover.Stop();
                     _action = StartCoroutine(Work(Collecting));
@@ -106,7 +116,7 @@ public class CollectorBotAI : SelectableObject
             else if (obj is MainBaseAI && _haveCollectedResource)                                   // Если задание на перенос
             {
                 _mover.Stop();
-                StoreResource((Resource)_target);
+                StoreResource(_task.Target as Resource);
                 OnMoveCompleted();
             }
             else if (obj is BuildingUnderConstruction)                                             // Если задание на строительство
@@ -122,22 +132,34 @@ public class CollectorBotAI : SelectableObject
         _haveCollectedResource = false;
         _mainBase.StoreResource(resource.ResourceType);
         resource.Delete();
-        _target = null;
+        //_target = null;
+        _task = null;
     }
+
+    //private void OnMoveCompleted()
+    //{
+    //    if (_target == null)
+    //        TaskCompleted?.Invoke(this);
+    //    else if (_haveCollectedResource == false && _target != null)
+    //        GoTo(_target.transform.position);
+    //    else
+    //        GoTo(_mainBase.transform.position);
+    //}
 
     private void OnMoveCompleted()
     {
-        if (_target == null)
+        if (_task == null)
             TaskCompleted?.Invoke(this);
-        else if (_haveCollectedResource == false && _target != null)
-            GoTo(_target.transform.position);
+        else if (_haveCollectedResource == false && _task != null)
+            GoTo(_task.Target.transform.position);
         else
             GoTo(_mainBase.transform.position);
     }
 
     private void Collecting()
     {
-        var resource = (Resource)_target;
+        //var resource = (Resource)_target;
+        var resource = _task.Target as Resource;
         _haveCollectedResource = true;
         resource.transform.SetParent(transform);
         resource.transform.localPosition = _resourceAttachmentPoint;
@@ -146,7 +168,8 @@ public class CollectorBotAI : SelectableObject
 
     private void Constructing()
     {
-        var building = (BuildingUnderConstruction)_target;
+        //var building = (BuildingUnderConstruction)_target;
+        var building = _task.Target as BuildingUnderConstruction;
         // По завершению строительства у построеного здания вызвать завершающий метод в  BuildingUnderConstruction
         building.CompleteConstruction();
     }

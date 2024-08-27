@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class MainBaseAI : Building
@@ -186,7 +187,7 @@ public class MainBaseAI : Building
 
             for (int j = 0; j < _issueTasks.Count; j++)
             {
-                if (_issueTasks[j].Target == (SelectableObject)allResources[i])
+                if (_issueTasks[j].Target == allResources[i] as SelectableObject)
                 {
                     contains = true;
                     break;
@@ -197,12 +198,32 @@ public class MainBaseAI : Building
             {
                 Task task = new Task(1, allResources[i]);               // Magic
                 task.Completed += OnTaskCompleted;
-                _taskPool.Add(task);
+                //_taskPool.Add(task);
+                // Добавить метод сортирующий массив задач по приоритету.
+                AddNewTask(task);
             }
         }
     }
 
-    private void DistributeCollectionTasks()
+    private void AddNewTask(Task newTask)
+    {
+        if (_taskPool.Count < 1)
+        {
+            _taskPool.Add(newTask);
+            return;
+        }
+
+        for (int i = 0; i < _taskPool.Count; i++)
+        {
+            if (newTask.Priority < _taskPool[i].Priority)
+            {
+                _taskPool.Insert(i, newTask);
+                break;
+            }
+        }
+    }
+
+    private void DistributeTasks()
     {
         bool isWork = true;
 
@@ -218,13 +239,13 @@ public class MainBaseAI : Building
             //_resourcesPlannedForCollection.Add(_freeResources[0]);
             //_freeResources.RemoveAt(0);
 
-            _poolOfIdleCollectorBots[0].SetCollectionTask(GetTask());
+            _poolOfIdleCollectorBots[0].SetTask(GetTask());
             _poolOfWorkingCollectorBots.Add(_poolOfIdleCollectorBots[0]);
             _poolOfIdleCollectorBots.RemoveAt(0);
         }
     }
 
-    private Task GetTask()                      // Упразднить
+    private Task GetTask()                      // Упразднить ?
     {
         Task task = _taskPool[0];
         _issueTasks.Add(task);
@@ -242,8 +263,8 @@ public class MainBaseAI : Building
             yield return new WaitForSeconds(Delay);
             FindFreeResources();
 
-            if (_freeResources.Count > 0 && _poolOfIdleCollectorBots.Count > 0)             // Это заменить на пулл задач где запрос задачь будут делать сами боты?
-                DistributeCollectionTasks();
+            //if (_freeResources.Count > 0 && _poolOfIdleCollectorBots.Count > 0)             // Это заменить на пулл задач где запрос задачь будут делать сами боты?
+            DistributeTasks();
         }
 
         _resourceScaning = null;

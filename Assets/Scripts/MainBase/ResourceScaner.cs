@@ -13,13 +13,13 @@ public class ResourceScaner
         _scanningArea = new Vector3(map.localScale.x * PlaneScale, map.localScale.y * PlaneScale, map.localScale.z * PlaneScale);
     }
 
-    public IList<Resource> MapScaning()
+    public IList<IResource> MapScaning()
     {
-        IList<Resource> list = new List<Resource>();
+        IList<IResource> list = new List<IResource>();
         Collider[] hits = Physics.OverlapBox(Vector3.zero, _scanningArea, Quaternion.identity, int.MaxValue ^ _selectMask);
 
         foreach (Collider hit in hits)
-            if (hit.gameObject.layer == _selectMask && hit.TryGetComponent<Resource>(out Resource resource))
+            if (hit.gameObject.layer == _selectMask && hit.TryGetComponent<IResource>(out IResource resource))
                 list.Add(resource);
 
         return list;

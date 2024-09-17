@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-// Сделать атодобавления NavMeshAgent компоненнта вместе с этим компонентом
+// Сделать атодобавления NavMeshAgent компоненнта вместе с этим компонентом //??????????????????????
 public class BotMover : MonoBehaviour
 {
     private NavMeshAgent _agent;

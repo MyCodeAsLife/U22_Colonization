@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 public class CollectorBotAI : SelectableObject
 {
@@ -62,26 +61,17 @@ public class CollectorBotAI : SelectableObject
             _action = null;
             ActionFinished?.Invoke();
         }
-
         _mover.Move(point);
     }
-
-    //public void SetTask(Resource resource)                                              // Здесь==================================
-    //{
-    //    if (_haveCollectedResource)
-    //        StoreResource((Resource)_target);
-
-    //    _target = resource;
-    //    _mover.Move(_target.transform.position);
-    //}
 
     public void SetTask(Task task)
     {
         if (_haveCollectedResource)
-            StoreResource(task.Target as Resource);
+            StoreResource(task.Target as IResource);
 
         _task = task;
-        _mover.Move(task.Target.transform.position);
+        //_mover.Move(task.Target.transform.position);        // Движение вызывать через GoTo ???
+        GoTo(task.Target.transform.position);               // Вызов из SetTask
     }
 
     public void SetBaseAffiliation(MainBaseAI mainBase)
@@ -105,9 +95,9 @@ public class CollectorBotAI : SelectableObject
         {
             var obj = other.GetComponent<SelectableObject>();
 
-            if (obj is Resource && _haveCollectedResource == false && /*_target != null*/_task != null)              // Если задание на сбор
+            if (obj is IResource && _haveCollectedResource == false && /*_target != null*/_task != null)              // Если задание на сбор
             {
-                if (Vector3.Distance(transform.position, _task.Target.transform.position) < 5f)
+                if ((_task.Target as IResource).GetId() == (obj as IResource).GetId())
                 {
                     _mover.Stop();
                     _action = StartCoroutine(Work(Collecting));
@@ -116,7 +106,7 @@ public class CollectorBotAI : SelectableObject
             else if (obj is MainBaseAI && _haveCollectedResource)                                   // Если задание на перенос
             {
                 _mover.Stop();
-                StoreResource(_task.Target as Resource);
+                StoreResource(_task.Target as IResource);
                 OnMoveCompleted();
             }
             else if (obj is BuildingUnderConstruction)                                             // Если задание на строительство
@@ -127,12 +117,18 @@ public class CollectorBotAI : SelectableObject
         }
     }
 
-    private void StoreResource(Resource resource)
+    private void StoreResource(IResource resource)
     {
         _haveCollectedResource = false;
-        _mainBase.StoreResource(resource.ResourceType);
+        _mainBase.StoreResource(resource.GetResourceType());
         resource.Delete();
         //_target = null;
+        TaskComplete();
+    }
+
+    private void TaskComplete()
+    {
+        _task.Complete();
         _task = null;
     }
 
@@ -151,22 +147,24 @@ public class CollectorBotAI : SelectableObject
         if (_task == null)
             TaskCompleted?.Invoke(this);
         else if (_haveCollectedResource == false && _task != null)
-            GoTo(_task.Target.transform.position);
+            GoTo(_task.Target.transform.position);          // Вызов из OnMoveCompleted
         else
-            GoTo(_mainBase.transform.position);
+            GoTo(_mainBase.transform.position);          // Вызов из OnMoveCompleted
     }
 
     private void Collecting()
     {
         //var resource = (Resource)_target;
-        var resource = _task.Target as Resource;
+        //var resource = _task.Target as Resource;                        // Ошибка получения ссылки на ресурс(или ошибка конвертации объекта в ресурс)
+        var resource = _task.Target;                        // Ошибка получения ссылки на ресурс(или ошибка конвертации объекта в ресурс)
         _haveCollectedResource = true;
         resource.transform.SetParent(transform);
         resource.transform.localPosition = _resourceAttachmentPoint;
-        _mover.Move(_mainBase.transform.position);
+        //_mover.Move(_mainBase.transform.position);             // Движение вызывать через GoTo ???
+        GoTo(_mainBase.transform.position);          // Вызов из Collecting
     }
 
-    private void Constructing()
+    private void Constructing()                         // Строительства нет в taskPool, добавить. Добавить возврат задачи в пулл при ручной выдачи задачи
     {
         //var building = (BuildingUnderConstruction)_target;
         var building = _task.Target as BuildingUnderConstruction;

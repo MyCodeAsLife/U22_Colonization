@@ -157,7 +157,7 @@ public class PlayerControlSystem : MonoBehaviour
         if (_hit.collider != null && _hit.collider.gameObject.layer == _groundMask)
             for (int i = 0; i < _listOfSelected.Count; i++)
                 if (_listOfSelected[i].TryGetComponent<CollectorBotAI>(out CollectorBotAI bot))
-                    bot.GoTo(_hit.point);
+                    bot.GoTo(_hit.point);                           // Сделать вызов движения по клику мышки через задачу ???
     }
 
     private void Select(SelectableObject obj)

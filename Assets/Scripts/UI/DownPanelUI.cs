@@ -1,8 +1,8 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
+using TMPro;
 
-public class BuildingPanelUI : MonoBehaviour
+public class DownPanelUI : MonoBehaviour
 {
     [SerializeField] private TMP_Text _displayNumberOfFood;
     [SerializeField] private TMP_Text _displayNumberOfTimber;
@@ -17,6 +17,11 @@ public class BuildingPanelUI : MonoBehaviour
     private OrderButton[] _orderButtons;
 
     //private MainBaseAI _selectBuilding;
+    private SelectableObject _selectedObject;
+
+    public TMP_Text DisplayNumberOfFood => _displayNumberOfFood;
+    public TMP_Text DisplayNumberOfTimber => _displayNumberOfTimber;
+    public TMP_Text DisplayNumberOfMarble => _displayNumberOfMarble;
 
     private void Awake()                                // +++++++++
     {
@@ -36,13 +41,9 @@ public class BuildingPanelUI : MonoBehaviour
         //OnChangeNumberOfMarble(0);
     }
 
-    public void TryBuy()    // Запрос к выделенному зданию на наличие необходимых ресурсов
-    {
-
-    }
-
     public void LinkBase(MainBaseAI mainBase)
     {
+        _selectedObject = mainBase;
         //_selectBuilding = mainBase;
         ChangeResourcesNumber(mainBase);
         mainBase.Store.FoodQuantityChanged += OnChangeNumberOfFood;
@@ -64,26 +65,27 @@ public class BuildingPanelUI : MonoBehaviour
         mainBase.Store.TimberQuantityChanged -= OnChangeNumberOfTimber;
         mainBase.Store.MarbleQuantityChanged -= OnChangeNumberOfMarble;
         //_selectBuilding = null;
+        _selectedObject = null;
     }
 
-    public void ShowPanel()                                             // private???
+    private void OnChangeNumberOfFood(int number) => _displayNumberOfFood.text = "Food: " + number.ToString();
+    private void OnChangeNumberOfTimber(int number) => _displayNumberOfTimber.text = "Timber: " + number.ToString();
+    private void OnChangeNumberOfMarble(int number) => _displayNumberOfMarble.text = "Marble: " + number.ToString();
+
+    private void ShowPanel()
     {
         if (_swimming != null)
             StopCoroutine(_swimming);
 
         _swimming = StartCoroutine(SwimmingPanel(_showPosition));
     }
-    public void HidePanel()                                             // private???
+    private void HidePanel()
     {
         if (_swimming != null)
             StopCoroutine(_swimming);
 
         _swimming = StartCoroutine(SwimmingPanel(_hidePosition));
     }
-
-    private void OnChangeNumberOfFood(int number) => _displayNumberOfFood.text = "Food: " + number.ToString();
-    private void OnChangeNumberOfTimber(int number) => _displayNumberOfTimber.text = "Timber: " + number.ToString();
-    private void OnChangeNumberOfMarble(int number) => _displayNumberOfMarble.text = "Marble: " + number.ToString();
 
     private void ChangeResourcesNumber(MainBaseAI mainBase)
     {

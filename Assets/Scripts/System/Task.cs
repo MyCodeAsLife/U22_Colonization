@@ -17,12 +17,4 @@ public class Task
     {
         Completed?.Invoke(this);
     }
-
-    public int CompareTo(object obj)
-    {
-        if (obj is Task task)
-            return Priority.CompareTo(task.Priority);
-        else
-            throw new ArgumentException("Incorrect parameter value");
-    }
 }

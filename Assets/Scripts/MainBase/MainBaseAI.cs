@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class MainBaseAI : Building
@@ -12,9 +11,10 @@ public class MainBaseAI : Building
     private Store _store = new();
     private Coroutine _resourceScaning;
     private ResourceScaner _resourceScaner;
-    private BuildingPanelUI _buildingPanelUI;                                                   //+++++
+    private DownPanelUI _buildingPanelUI;                                                   //+++++
     private CollectorBotAI _prefabCollectorBot;
 
+    // Задачи выделить в отдельную сущность
     private List<Task> _taskPool = new();
     private List<Task> _issueTasks = new();
     private List<AmountOfResources> _priceList = new();
@@ -106,12 +106,12 @@ public class MainBaseAI : Building
 
     private void OnTaskCompleted(Task task)
     {
-        if (_taskPool.Contains(task))
-        {
-            _taskPool.Remove(task);
-            task.Completed -= OnTaskCompleted;
-        }
-        else if (_issueTasks.Contains(task))
+        //if (_taskPool.Contains(task))           // Эта проверка лишняя??
+        //{
+        //    _taskPool.Remove(task);
+        //    task.Completed -= OnTaskCompleted;
+        //}
+        if (_issueTasks.Contains(task))
         {
             _issueTasks.Remove(task);
             task.Completed -= OnTaskCompleted;
@@ -121,7 +121,7 @@ public class MainBaseAI : Building
     private void StartInicialization()
     {
         //_priceList = new List<AmountOfResources>();
-        _buildingPanelUI = FindFirstObjectByType<BuildingPanelUI>();
+        _buildingPanelUI = FindFirstObjectByType<DownPanelUI>();
         _map = GameObject.FindGameObjectWithTag("Map").transform;                               // Magical ???
         _selectionIndicator.localScale = Vector3.one * 0.5f;                                    // Magical ???
         _resourceScaner = new ResourceScaner(_map);
@@ -165,7 +165,7 @@ public class MainBaseAI : Building
 
     private void FindFreeResources()                                // переделать для корректной работы с несколькими независимыми базами на карте
     {
-        IList<Resource> allResources = _resourceScaner.MapScaning();
+        var allResources = _resourceScaner.MapScaning();
 
         //foreach (var resource in allResources)
         //    if (_freeResources.Contains(resource) == false)
@@ -178,28 +178,35 @@ public class MainBaseAI : Building
 
             for (int j = 0; j < _taskPool.Count; j++)
             {
-                if (_taskPool[j].Target == (SelectableObject)allResources[i])
+                if (_taskPool[j].Target is IResource)
                 {
-                    contains = true;
-                    break;
-                }
-            }
-
-            for (int j = 0; j < _issueTasks.Count; j++)
-            {
-                if (_issueTasks[j].Target == allResources[i] as SelectableObject)
-                {
-                    contains = true;
-                    break;
+                    if ((_taskPool[j].Target as IResource).GetId() == allResources[i].GetId())
+                    {
+                        contains = true;
+                        break;
+                    }
                 }
             }
 
             if (contains == false)
             {
-                Task task = new Task(1, allResources[i]);               // Magic
+                for (int j = 0; j < _issueTasks.Count; j++)
+                {
+                    if (_issueTasks[j].Target is IResource)
+                    {
+                        if ((_issueTasks[j].Target as IResource).GetId() == allResources[i].GetId())
+                        {
+                            contains = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (contains)
+                    continue;
+
+                Task task = new Task(1, allResources[i] as Resource);               // Magic
                 task.Completed += OnTaskCompleted;
-                //_taskPool.Add(task);
-                // Добавить метод сортирующий массив задач по приоритету.
                 AddNewTask(task);
             }
         }
@@ -207,6 +214,8 @@ public class MainBaseAI : Building
 
     private void AddNewTask(Task newTask)
     {
+        bool taskIsAdded = false;
+
         if (_taskPool.Count < 1)
         {
             _taskPool.Add(newTask);
@@ -218,9 +227,13 @@ public class MainBaseAI : Building
             if (newTask.Priority < _taskPool[i].Priority)
             {
                 _taskPool.Insert(i, newTask);
+                taskIsAdded = true;
                 break;
             }
         }
+
+        if (taskIsAdded == false)
+            _taskPool.Add(newTask);
     }
 
     private void DistributeTasks()
@@ -245,7 +258,7 @@ public class MainBaseAI : Building
         }
     }
 
-    private Task GetTask()                      // Упразднить ?
+    private Task GetTask()
     {
         Task task = _taskPool[0];
         _issueTasks.Add(task);
@@ -262,8 +275,6 @@ public class MainBaseAI : Building
         {
             yield return new WaitForSeconds(Delay);
             FindFreeResources();
-
-            //if (_freeResources.Count > 0 && _poolOfIdleCollectorBots.Count > 0)             // Это заменить на пулл задач где запрос задачь будут делать сами боты?
             DistributeTasks();
         }
 

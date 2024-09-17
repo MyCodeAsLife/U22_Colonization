@@ -16,6 +16,7 @@ public class ResourceSpawner : MonoBehaviour
     private int _maxTimberOnMap;
     private int _maxMarbleOnMap;
     private int _groundLayerMask;
+    private int _idCounter;
 
     private float _mapX;
     private float _mapZ;
@@ -125,7 +126,8 @@ public class ResourceSpawner : MonoBehaviour
 
             //res.transform.position = spawnPos;
             //res.gameObject.SetActive(true);
-            resourceSpawner.Spawn(spawnPos);
+            resourceSpawner.Spawn(spawnPos, _idCounter);
+            _idCounter++;
         }
 
         //_navMesh?.BuildNavMesh();                                                                        // +++++

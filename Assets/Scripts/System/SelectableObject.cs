@@ -4,7 +4,6 @@ public class SelectableObject : MonoBehaviour
 {
     protected Transform _prefabSelectionIndicator;
     protected Transform _selectionIndicator;
-    protected SingleReactiveProperty<float> _actionProgress = new();
 
     protected virtual void Awake()
     {

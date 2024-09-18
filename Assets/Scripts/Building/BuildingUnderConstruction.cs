@@ -5,14 +5,25 @@ public class BuildingUnderConstruction : Building
 {
     [SerializeField] private BuildingType _buildingType;
 
+    protected override void Start()
+    {
+        base.Start();
+        DurationOfAction = 5f;
+    }
+
+    public void StartConstruction(ChangingObject builder)
+    {
+        builder.SubscribeToActionProgress(Constructing);
+    }
+
+    public void StopConstruction(ChangingObject builder)
+    {
+        builder.UnsubscribeToActionProgress(Constructing);
+    }
+
     public void CompleteConstruction()
     {
-        Building building;
-
-        //if (_buildingType == BuildingType.MainBase)
-        //    building = transform.AddComponent<MainBaseAI>();
-        //else if (_buildingType == BuildingType.Barack)
-        //    building = transform.AddComponent<Barack>();
+        Building building;                                  // Нужно ли кэширование ??
 
         switch (_buildingType)
         {
@@ -27,10 +38,15 @@ public class BuildingUnderConstruction : Building
 
         // Вызвать активацию строения
 
-        // Удалить этот компонент
         Destroy(this);
     }
 
-    // Корутину на медленный подъем строения из-под земли
-    // По завершению корутины вызвать CompleteConstruction()
+    private void Constructing(float num)
+    {
+        ActionProgress.Value = num;
+
+        // Подъем здания из-под земли
+        float newPosY = transform.position.y + transform.localScale.y * num;
+        transform.position = new Vector3(transform.position.x, newPosY, transform.position.z);
+    }
 }

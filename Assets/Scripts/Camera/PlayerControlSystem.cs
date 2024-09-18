@@ -34,6 +34,7 @@ public class PlayerControlSystem : MonoBehaviour
     {
         _plane = new Plane(Vector3.up, Vector3.zero);
         _inputActions = new MainInputActions();
+        _buildingPlacer = GetComponent<BuildingPlacer>();
     }
 
     private void OnEnable()
@@ -166,6 +167,9 @@ public class PlayerControlSystem : MonoBehaviour
         {
             _listOfSelected.Add(obj);
             obj.Selected();
+
+            if (obj is MainBaseAI)
+                _buildingPlacer.SelectInteractivObject(obj as MainBaseAI);
         }
     }
 
@@ -175,6 +179,9 @@ public class PlayerControlSystem : MonoBehaviour
         {
             obj.UnSelect();
             _listOfSelected.Remove(obj);
+
+            if (obj is MainBaseAI)
+                _buildingPlacer.UnSelectInteractivObject();
         }
     }
 

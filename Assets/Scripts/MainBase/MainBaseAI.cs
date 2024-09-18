@@ -14,14 +14,11 @@ public class MainBaseAI : Building
     private DownPanelUI _buildingPanelUI;                                                   //+++++
     private CollectorBotAI _prefabCollectorBot;
 
-    // Задачи выделить в отдельную сущность
     private List<Task> _taskPool = new();
     private List<Task> _issueTasks = new();
     private List<AmountOfResources> _priceList = new();
     private List<CollectorBotAI> _poolOfIdleCollectorBots = new();
     private List<CollectorBotAI> _poolOfWorkingCollectorBots = new();
-    //private IList<Resource> _freeResources;
-    //private IList<Resource> _resourcesPlannedForCollection;
 
     public IStore Store { get { return _store; } }
 
@@ -48,13 +45,6 @@ public class MainBaseAI : Building
 
     public void StoreResource(ResourceType resourceType)
     {
-        //for (int i = 0; i < _resourcesPlannedForCollection.Count; ++i)
-        //    if (_resourcesPlannedForCollection[i].ResourceType == resourceType)
-        //    {
-        //        _resourcesPlannedForCollection.RemoveAt(i);
-        //        break;
-        //    }
-
         switch (resourceType)
         {
             case ResourceType.Food:
@@ -104,13 +94,32 @@ public class MainBaseAI : Building
         _poolOfIdleCollectorBots.Add(collectorBot);
     }
 
+    public void AddNewTask(Task newTask)
+    {
+        bool taskIsAdded = false;
+
+        if (_taskPool.Count < 1)
+        {
+            _taskPool.Add(newTask);
+            return;
+        }
+
+        for (int i = 0; i < _taskPool.Count; i++)
+        {
+            if (newTask.Priority < _taskPool[i].Priority)
+            {
+                _taskPool.Insert(i, newTask);
+                taskIsAdded = true;
+                break;
+            }
+        }
+
+        if (taskIsAdded == false)
+            _taskPool.Add(newTask);
+    }
+
     private void OnTaskCompleted(Task task)
     {
-        //if (_taskPool.Contains(task))           // Эта проверка лишняя??
-        //{
-        //    _taskPool.Remove(task);
-        //    task.Completed -= OnTaskCompleted;
-        //}
         if (_issueTasks.Contains(task))
         {
             _issueTasks.Remove(task);
@@ -120,19 +129,11 @@ public class MainBaseAI : Building
 
     private void StartInicialization()
     {
-        //_priceList = new List<AmountOfResources>();
         _buildingPanelUI = FindFirstObjectByType<DownPanelUI>();
         _map = GameObject.FindGameObjectWithTag("Map").transform;                               // Magical ???
         _selectionIndicator.localScale = Vector3.one * 0.5f;                                    // Magical ???
         _resourceScaner = new ResourceScaner(_map);
         _prefabCollectorBot = Resources.Load<CollectorBotAI>("Prefabs/CollectorBot");
-        //_maxCountCollectorBots = 0;
-        //_freeResources = new List<Resource>();
-        //_resourcesPlannedForCollection = new List<Resource>();
-        //_taskPool = new List<Task>();
-        //_poolOfWorkingCollectorBots = new List<CollectorBotAI>();
-        //_poolOfIdleCollectorBots = new List<CollectorBotAI>();
-
         StartPriceList();
         _resourceScaning = StartCoroutine(ResourceScanning());
         StartCoroutine(StartInitialization());
@@ -167,11 +168,6 @@ public class MainBaseAI : Building
     {
         var allResources = _resourceScaner.MapScaning();
 
-        //foreach (var resource in allResources)
-        //    if (_freeResources.Contains(resource) == false)
-        //        if (_resourcesPlannedForCollection.Contains(resource) == false)
-        //            _freeResources.Add(resource);
-
         for (int i = 0; i < allResources.Count; i++)
         {
             bool contains = false;
@@ -205,35 +201,11 @@ public class MainBaseAI : Building
                 if (contains)
                     continue;
 
-                Task task = new Task(1, allResources[i] as Resource);               // Magic
+                Task task = new Task(1, TypesOfTasks.Harvesting, allResources[i] as Resource);               // Magic
                 task.Completed += OnTaskCompleted;
                 AddNewTask(task);
             }
         }
-    }
-
-    private void AddNewTask(Task newTask)
-    {
-        bool taskIsAdded = false;
-
-        if (_taskPool.Count < 1)
-        {
-            _taskPool.Add(newTask);
-            return;
-        }
-
-        for (int i = 0; i < _taskPool.Count; i++)
-        {
-            if (newTask.Priority < _taskPool[i].Priority)
-            {
-                _taskPool.Insert(i, newTask);
-                taskIsAdded = true;
-                break;
-            }
-        }
-
-        if (taskIsAdded == false)
-            _taskPool.Add(newTask);
     }
 
     private void DistributeTasks()
@@ -242,15 +214,9 @@ public class MainBaseAI : Building
 
         while (isWork)
         {
-            //if (_freeResources.Count < 1 || _poolOfIdleCollectorBots.Count < 1)
-            //    break;
             if (_taskPool.Count < 1 || _poolOfIdleCollectorBots.Count < 1)
                 break;
             // проверить на наличие строительных задач или создать пулл задач
-
-            //_poolOfIdleCollectorBots[0].SetCollectionTask(_freeResources[0]);
-            //_resourcesPlannedForCollection.Add(_freeResources[0]);
-            //_freeResources.RemoveAt(0);
 
             _poolOfIdleCollectorBots[0].SetTask(GetTask());
             _poolOfWorkingCollectorBots.Add(_poolOfIdleCollectorBots[0]);

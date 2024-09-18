@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Building : SelectableObject
+public class Building : ChangingObject
 {
     protected Vector3 SelfSize;
     protected AmountOfResources Price;

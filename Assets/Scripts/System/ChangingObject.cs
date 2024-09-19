@@ -25,13 +25,18 @@ public class ChangingObject : SelectableObject
     public void UnsubscribeToActionProgress(Action<float> func) => ActionProgress.Change -= func;
     public float GetActionProgress() => ActionProgress.Value;
 
-    public virtual void StopAction()
+    protected virtual void StopAction()
     {
         StopCoroutine(CurrentAction);
         CurrentAction = null;
     }
 
-    public void ActionFinish()
+    protected void ActionStart()
+    {
+        ActionStarted?.Invoke();
+    }
+
+    protected virtual void ActionFinish()
     {
         ActionFinished?.Invoke();
         CurrentAction = null;

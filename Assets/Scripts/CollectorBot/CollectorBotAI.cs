@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class CollectorBotAI : ChangingObject
 {
-    private BotMover _mover;
     private Task _task;
+    private BotMover _mover;
     private MainBaseAI _mainBase;
-    private Vector3 _resourceAttachmentPoint;
     private bool _haveCollectedResource;
     private int _interactableObjectMask;
+    private Vector3 _resourceAttachmentPoint;
 
     public event Action<CollectorBotAI> TaskCompleted;
 
@@ -43,14 +43,6 @@ public class CollectorBotAI : ChangingObject
         _resourceAttachmentPoint = new Vector3(0, transform.localScale.y + 1, 0);
     }
 
-    public override void StopAction()
-    {
-        base.StopAction();
-
-        if (_task.TypeOfTask == TypesOfTasks.Constructing)
-            (_task.Target as BuildingUnderConstruction).StopConstruction(this);
-    }
-
     public void GoTo(Vector3 point)
     {
         if (CurrentAction != null)
@@ -58,6 +50,7 @@ public class CollectorBotAI : ChangingObject
             StopAction();
             ActionFinish();
         }
+
         _mover.Move(point);
     }
 
@@ -73,6 +66,20 @@ public class CollectorBotAI : ChangingObject
     public void SetBaseAffiliation(MainBaseAI mainBase)
     {
         _mainBase = mainBase;
+    }
+
+    protected override void StopAction()
+    {
+        base.StopAction();
+
+        if (_task.TypeOfTask == TypesOfTasks.Constructing)          // Добавить ActionFinish в StopConstruction ??
+            (_task.Target as BuildingUnderConstruction).StopConstruction(this);
+    }
+
+    protected void TaskComplete()
+    {
+        _task.Complete();
+        _task = null;
     }
 
     private void OnTriggerEnter(Collider other)                 // Переделать под сравнения на тип текущей задачи
@@ -100,8 +107,9 @@ public class CollectorBotAI : ChangingObject
                 var building = obj as BuildingUnderConstruction;
                 _mover.Stop();
                 CurrentAction = StartCoroutine(PerformingAnAction(Constructing));
-                ActionProgress.Value = building.GetActionProgress();
+                //ActionProgress.Value = building.GetActionProgress();
                 building.StartConstruction(this);
+                //Debug.Log(building.GetActionProgress());                                            //+++++++++++++++++++++++++
             }
         }
     }
@@ -112,12 +120,6 @@ public class CollectorBotAI : ChangingObject
         _mainBase.StoreResource(resource.GetResourceType());
         resource.Delete();
         TaskComplete();
-    }
-
-    private void TaskComplete()
-    {
-        _task.Complete();
-        _task = null;
     }
 
     private void OnMoveCompleted()
@@ -143,6 +145,8 @@ public class CollectorBotAI : ChangingObject
     {
         var building = _task.Target as BuildingUnderConstruction;
         // По завершению строительства у построеного здания вызвать завершающий метод в  BuildingUnderConstruction
-        building.CompleteConstruction();
+        building.CompleteConstruction(this);
+        TaskComplete();
+        OnMoveCompleted();
     }
 }

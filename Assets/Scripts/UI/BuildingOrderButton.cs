@@ -10,7 +10,7 @@ public class BuildingOrder : OrderButton
         {
             Debug.Log("Денег на здание достаточно.");                                 // ++++++++++++++++++++
             _currentBuilding.SubtarctResources(price);
-            Placer.CreateBuilding(Prefab.GetComponent<Building>());
+            Placer.CreateBuilding(Prefab.GetComponent<BuildingUnderConstruction>());
         }
         else
             Debug.Log("Денег на здание нет.");                                 // ++++++++++++++++++++

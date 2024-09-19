@@ -8,7 +8,7 @@ public class BuildingPlacer : MonoBehaviour
 {
     private SingleReactiveProperty<float> _cellSize = new();
     private PlayerControlSystem _controlSysytem;
-    [SerializeField] private Building _flyingBuilding;                                   // ++++++++++++
+    [SerializeField] private BuildingUnderConstruction _flyingBuilding;                                   // ++++++++++++
     private Dictionary<Vector2Int, Building> _buildingsPositions = new();
     private MainBaseAI _selectedInteractiveObject;     // Если длать разные типы объектов у которых будут кнопки, то здесь нужен универсальный
     private int _roundPosX;
@@ -48,7 +48,7 @@ public class BuildingPlacer : MonoBehaviour
         _selectedInteractiveObject = null;
     }
 
-    public void CreateBuilding(Building prefab)
+    public void CreateBuilding(BuildingUnderConstruction prefab)
     {
         var parent = GameObject.FindGameObjectWithTag("ResourceSpawner").transform.parent;      //Magic string
         _flyingBuilding = Instantiate(prefab, parent);                                      // В качестве родителя делать MainCanvas
@@ -65,11 +65,13 @@ public class BuildingPlacer : MonoBehaviour
             _controlSysytem.InputActions.Mouse.Delta.started -= OnMouseMove;
             _controlSysytem.InputActions.Mouse.LeftButtonClick.performed -= OnMouseLeftButtonClick;
 
-            if (_selectedInteractiveObject != null)
+            if (_selectedInteractiveObject != null)                                                                 // Если летающее строение это MainBase то создать задачу на строительство базы
                 _selectedInteractiveObject.AddNewTask(new Task(0, TypesOfTasks.Constructing, _flyingBuilding));        // Magic
 
-            float newPosY = _flyingBuilding.transform.position.y - _flyingBuilding.transform.localScale.y;
+            float newPosY = _flyingBuilding.transform.position.y - _flyingBuilding.transform.localScale.y * 2;        // Magic
+            _flyingBuilding.SetEndPosition(_flyingBuilding.transform.position);
             _flyingBuilding.transform.position = new Vector3(_flyingBuilding.transform.position.x, newPosY, _flyingBuilding.transform.position.z);
+            _flyingBuilding.SetStartPosition(_flyingBuilding.transform.position);
             _flyingBuilding = null;
         }
     }

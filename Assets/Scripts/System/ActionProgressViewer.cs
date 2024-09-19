@@ -14,6 +14,16 @@ public class ActionProgressViewer : MonoBehaviour
         _progressBar = Instantiate<Slider>(_prefabProgressBar, transform);
     }
 
+    public void SetProgressBarPosition(Vector3 position)
+    {
+        _progressBar.transform.localPosition = position;
+    }
+
+    public void SetProgressBarScale(Vector3 scale)
+    {
+        _progressBar.transform.localScale = scale;
+    }
+
     private void OnDisable()
     {
         _presenter.ActionStarted -= OnStartAction;

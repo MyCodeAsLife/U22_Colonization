@@ -118,6 +118,15 @@ public class MainBaseAI : Building
             _taskPool.Add(newTask);
     }
 
+    private void TransferCollectorBot(Flag newBase, CollectorBotAI bot)                   // Передать бота
+    {
+        newBase.SetBot(bot);
+        bot.TaskCompleted -= OnCollectorBotTaskCompleted;
+        bot.SetBaseAffiliation(this);
+        _poolOfIdleCollectorBots.Remove(bot);
+        _poolOfWorkingCollectorBots.Remove(bot);
+    }
+
     private void OnTaskCompleted(Task task)
     {
         if (_issueTasks.Contains(task))
@@ -216,7 +225,6 @@ public class MainBaseAI : Building
         {
             if (_taskPool.Count < 1 || _poolOfIdleCollectorBots.Count < 1)
                 break;
-            // проверить на наличие строительных задач или создать пулл задач
 
             _poolOfIdleCollectorBots[0].SetTask(GetTask());
             _poolOfWorkingCollectorBots.Add(_poolOfIdleCollectorBots[0]);

@@ -265,7 +265,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Prefab: {fileID: 2665822812400504789, guid: 5725558fa4d206e43928547f67c31c10, type: 3}
-  Placer: {fileID: 963194232}
 --- !u!1 &150286244
 GameObject:
   m_ObjectHideFlags: 0
@@ -2089,7 +2088,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1366285618}
         m_TargetAssemblyTypeName: BuildingOrder, Assembly-CSharp
-        m_MethodName: TryBuy
+        m_MethodName: CreateFlyingBuilding
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3061,7 +3060,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: -1971995159953543927, guid: 737d7d2ac0fa2634d8e6c4e4a0187ed8, type: 3}
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1728441668196638311, guid: 737d7d2ac0fa2634d8e6c4e4a0187ed8, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 5450387342306098670, guid: 737d7d2ac0fa2634d8e6c4e4a0187ed8, type: 3}

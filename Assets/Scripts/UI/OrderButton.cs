@@ -3,11 +3,10 @@ using UnityEngine;
 public class OrderButton : MonoBehaviour
 {
     [SerializeField] protected SelectableObject Prefab;
-    [SerializeField] protected BuildingPlacer Placer;
 
     protected MainBaseAI _currentBuilding;                                    // Или у каждого строения сделать ссылку на пренадлежность базе
 
-    public virtual void TryBuy() { }
+    //public virtual void TryBuy() { }
 
     public void SetCustomer(MainBaseAI building)
     {

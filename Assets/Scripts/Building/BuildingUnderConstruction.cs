@@ -1,15 +1,24 @@
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class BuildingUnderConstruction : Building
 {
     [SerializeField] private BuildingType _buildingType;
+    private CollectorBotAI _transferBot;
+    private Flag _flag;
     private float _startPositionY;
     private float _endPositionY;
+
+    public bool IsBuildingInProgress { get; private set; }
+    public Vector2Int RoundPosition { get; private set; }
+
+    public event Action<BuildingUnderConstruction> BuildingStarted;
 
     protected override void Start()
     {
         base.Start();
+        _flag = GetComponentInChildren<Flag>();
         DurationOfAction = 5f;
         Vector3 progressBarPosition = new Vector3(0, 4, 0);                         //Magic ??
         Vector3 progressBarScale = new Vector3(0.05f, 0.05f, 0.05f);                //Magic ??
@@ -22,6 +31,7 @@ public class BuildingUnderConstruction : Building
 
     public void StartConstruction(ChangingObject builder)
     {
+        BuildingStarted?.Invoke(this);
         builder.SubscribeToActionProgress(Constructing);
         ActionStart();
     }
@@ -29,6 +39,16 @@ public class BuildingUnderConstruction : Building
     {
         builder.UnsubscribeToActionProgress(Constructing);
         ActionFinish();
+    }
+
+    public void SetRoundPosition(Vector2Int roundPos)
+    {
+        RoundPosition = roundPos;
+    }
+
+    public void SetBot(CollectorBotAI bot)
+    {
+        _transferBot = bot;
     }
 
     public void CompleteConstruction(ChangingObject builder)
@@ -50,6 +70,7 @@ public class BuildingUnderConstruction : Building
         ActionFinish();
         // Вызвать активацию строения
 
+        Destroy(_flag.gameObject);
         Destroy(this);
     }
 

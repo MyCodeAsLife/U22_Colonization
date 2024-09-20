@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class UnitOrder : OrderButton
 {
-    public override void TryBuy()
+    public void TryBuy()
     {
         AmountOfResources price = _currentBuilding.GetPriceOf(Prefab);
 

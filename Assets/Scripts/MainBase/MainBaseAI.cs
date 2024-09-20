@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 public class MainBaseAI : Building
@@ -13,6 +14,8 @@ public class MainBaseAI : Building
     private ResourceScaner _resourceScaner;
     private DownPanelUI _buildingPanelUI;                                                   //+++++
     private CollectorBotAI _prefabCollectorBot;
+    private BuildingUnderConstruction _scheduleBuilding;
+    private SingleReactiveProperty<int> _numberOfBots;
 
     private List<Task> _taskPool = new();
     private List<Task> _issueTasks = new();
@@ -92,6 +95,7 @@ public class MainBaseAI : Building
         collectorBot.SetBaseAffiliation(this);
         collectorBot.GoTo(_gatheringPoint.position);
         _poolOfIdleCollectorBots.Add(collectorBot);
+        _numberOfBots.Value++;
     }
 
     public void AddNewTask(Task newTask)
@@ -118,7 +122,51 @@ public class MainBaseAI : Building
             _taskPool.Add(newTask);
     }
 
-    private void TransferCollectorBot(Flag newBase, CollectorBotAI bot)                   // Передать бота
+    public void ScheduleConstruction(BuildingUnderConstruction building)
+    {
+        if (_scheduleBuilding == null)
+        {
+            _scheduleBuilding = building;
+        }
+        else if (_scheduleBuilding.IsBuildingInProgress)
+        {
+            Destroy(building.gameObject);
+        }
+        else
+        {
+            _scheduleBuilding.transform.position = building.transform.position;
+            Destroy(building.gameObject);
+        }
+
+        if (CheckingForConditionsForConstruction() == false)
+        {
+            _numberOfBots.Change += WaitingForConditionsForConstruction;
+            _store.FoodQuantityChanged += WaitingForConditionsForConstruction;
+            _store.TimberQuantityChanged += WaitingForConditionsForConstruction;
+            _store.MarbleQuantityChanged += WaitingForConditionsForConstruction;
+        }
+    }
+
+    // Функция ожидания выполнения условий
+    private void WaitingForConditionsForConstruction(int number)
+    {
+        if (CheckingForConditionsForConstruction())
+        {
+            _numberOfBots.Change -= WaitingForConditionsForConstruction;
+            _store.FoodQuantityChanged -= WaitingForConditionsForConstruction;
+            _store.TimberQuantityChanged -= WaitingForConditionsForConstruction;
+            _store.MarbleQuantityChanged -= WaitingForConditionsForConstruction;
+        }
+    }
+
+    // Функция проверки необходимых условий
+    private bool CheckingForConditionsForConstruction()
+    {
+        var amountOfResources = _store.AmountOfResources;
+        return amount.Food >= price.Food && amount.Timber >= price.Timber && amount.Marble >= price.Marble;
+    }
+
+    private void TransferCollectorBot(BuildingUnderConstruction newBase, CollectorBotAI bot)                   // Передать бота
     {
         newBase.SetBot(bot);
         bot.TaskCompleted -= OnCollectorBotTaskCompleted;

@@ -141,10 +141,9 @@ public class CollectorBotAI : ChangingObject
         GoTo(_mainBase.transform.position);
     }
 
-    private void Constructing()                         // Строительства нет в taskPool, добавить. Добавить возврат задачи в пулл при ручной выдачи задачи
+    private void Constructing()
     {
         var building = _task.Target as BuildingUnderConstruction;
-        // По завершению строительства у построеного здания вызвать завершающий метод в  BuildingUnderConstruction
         building.CompleteConstruction(this);
         TaskComplete();
         OnMoveCompleted();

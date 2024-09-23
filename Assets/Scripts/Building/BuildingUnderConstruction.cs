@@ -46,7 +46,7 @@ public class BuildingUnderConstruction : Building
         RoundPosition = roundPos;
     }
 
-    public void SetBot(CollectorBotAI bot)
+    public void SetTransferBot(CollectorBotAI bot)
     {
         _transferBot = bot;
     }
@@ -60,6 +60,8 @@ public class BuildingUnderConstruction : Building
         {
             case BuildingType.MainBase:
                 building = transform.AddComponent<MainBaseAI>();
+                // Передать бота новой базе
+                building.GetComponent<MainBaseAI>().SetTransferBot(_transferBot);
                 break;
 
             case BuildingType.Barack:
@@ -68,7 +70,7 @@ public class BuildingUnderConstruction : Building
         }
 
         ActionFinish();
-        // Вызвать активацию строения
+        // Вызвать активацию строения если нужно
 
         Destroy(_flag.gameObject);
         Destroy(this);

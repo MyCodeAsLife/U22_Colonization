@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3913189364576401703}
   - component: {fileID: 5324985135727388313}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Flag
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -58,7 +58,7 @@ GameObject:
   - component: {fileID: 179995711219891908}
   - component: {fileID: 2844941010658645410}
   - component: {fileID: 5940291553041276901}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -165,7 +165,7 @@ GameObject:
   - component: {fileID: 3500059419722090971}
   - component: {fileID: 5682842265557131519}
   - component: {fileID: 6667469219939734772}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: shaft
   m_TagString: Untagged
   m_Icon: {fileID: 0}

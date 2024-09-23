@@ -639,6 +639,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2593440881026506577}
+  - component: {fileID: 6331591159185087408}
   m_Layer: 2
   m_Name: GatheringPoint
   m_TagString: Untagged
@@ -661,6 +662,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6713908716710316391}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6331591159185087408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7562805944203670456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93c46d7664bffd44baf3b45c209a86ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &349076318743084782
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -672,6 +685,14 @@ PrefabInstance:
     - target: {fileID: 1379371996994248841, guid: 1558e28c19a764341b4b927064af71fd, type: 3}
       propertyPath: m_Name
       value: Flag
+      objectReference: {fileID: 0}
+    - target: {fileID: 1379371996994248841, guid: 1558e28c19a764341b4b927064af71fd, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2824861163824217154, guid: 1558e28c19a764341b4b927064af71fd, type: 3}
+      propertyPath: m_Layer
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3913189364576401703, guid: 1558e28c19a764341b4b927064af71fd, type: 3}
       propertyPath: m_LocalPosition.x
@@ -712,6 +733,10 @@ PrefabInstance:
     - target: {fileID: 3913189364576401703, guid: 1558e28c19a764341b4b927064af71fd, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6649702080189257440, guid: 1558e28c19a764341b4b927064af71fd, type: 3}
+      propertyPath: m_Layer
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

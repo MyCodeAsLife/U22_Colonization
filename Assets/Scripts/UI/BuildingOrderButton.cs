@@ -3,6 +3,7 @@ using UnityEngine;
 public class BuildingOrder : OrderButton
 {
     [SerializeField] protected BuildingPlacer Placer;
+    [SerializeField] private BuildingUnderConstruction _prefab;
 
     //public override void TryBuy()                       // Упразднить в кнопке по строительству +++++++++++++++++++++++++++++++++++
     //{
@@ -21,6 +22,6 @@ public class BuildingOrder : OrderButton
     // При нажатии на кнопку создать "летающее строение"
     public void CreateFlyingBuilding()
     {
-        Placer.CreateFlyingBuilding(Prefab.GetComponent<BuildingUnderConstruction>());
+        Placer.CreateFlyingBuilding(_prefab);
     }
 }

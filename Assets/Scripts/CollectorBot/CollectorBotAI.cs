@@ -84,11 +84,11 @@ public class CollectorBotAI : ChangingObject
 
     private void OnTriggerEnter(Collider other)                 // Переделать под сравнения на тип текущей задачи
     {
-        if (other.gameObject.layer == _interactableObjectMask)                                  // Приделать состояние задач, и в зависимости от задачи к Action подключать нужную функцию
+        if (_task != null && other.gameObject.layer == _interactableObjectMask)                                  // Приделать состояние задач, и в зависимости от задачи к Action подключать нужную функцию
         {
             var obj = other.GetComponent<SelectableObject>();
 
-            if (obj is IResource && _haveCollectedResource == false && _task != null)              // Если задание на сбор
+            if (/*obj is IResource*/_task.TypeOfTask == TypesOfTasks.Harvesting && _haveCollectedResource == false && obj is IResource /*&& _task != null*/)              // Если задание на сбор
             {
                 if ((_task.Target as IResource).GetId() == (obj as IResource).GetId())
                 {
@@ -96,13 +96,13 @@ public class CollectorBotAI : ChangingObject
                     CurrentAction = StartCoroutine(PerformingAnAction(Collecting));
                 }
             }
-            else if (obj is MainBaseAI && _haveCollectedResource)                                   // Если задание на перенос
+            else if (_haveCollectedResource && obj is MainBaseAI && obj as MainBaseAI == _mainBase)                                   // Если задание на перенос
             {
                 _mover.Stop();
                 StoreResource(_task.Target as IResource);
                 OnMoveCompleted();
             }
-            else if (obj is BuildingUnderConstruction && _task.TypeOfTask == TypesOfTasks.Constructing)       // Если задание на строительство
+            else if (_task.TypeOfTask == TypesOfTasks.Constructing && obj is BuildingUnderConstruction)       // Если задание на строительство
             {
                 var building = obj as BuildingUnderConstruction;
                 _mover.Stop();

@@ -4,12 +4,12 @@ public class UnitOrder : OrderButton
 {
     public void TryBuy()
     {
-        AmountOfResources price = _currentBuilding.GetPriceOf(Prefab);
+        AmountOfResources price = _currentBuilding.GetPriceOf(objectPrice);
 
         if (CheckPriceAvailability(_currentBuilding.Store.GetAmountOfResources(), price))
         {
             Debug.Log("Денег на юнит достаточно.");                                 // ++++++++++++++++++++
-            _currentBuilding.SubtarctResources(price);
+            _currentBuilding.SubtractResources(price);
             _currentBuilding.CreateCollectorBot();
         }
         else

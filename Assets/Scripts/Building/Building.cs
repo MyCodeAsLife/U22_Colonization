@@ -3,7 +3,6 @@ using UnityEngine;
 public class Building : ChangingObject
 {
     protected Vector3 SelfSize;
-    protected AmountOfResources Price;
 
     private Vector3 _square;
     private Color[] _startColors;

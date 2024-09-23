@@ -1,25 +1,24 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 
 public class MainBaseAI : Building
 {
-    [SerializeField] private Transform _gatheringPoint;
     [SerializeField] private int _maxCountCollectorBots;                         // +++++
 
     private Transform _map;
     private Store _store = new();
     private Coroutine _resourceScaning;
-    private ResourceScaner _resourceScaner;
     private DownPanelUI _buildingPanelUI;                                                   //+++++
+    private GatheringPoint _gatheringPoint;
+    private ResourceScaner _resourceScaner;
     private CollectorBotAI _prefabCollectorBot;
     private BuildingUnderConstruction _scheduleBuilding;
-    private SingleReactiveProperty<int> _numberOfBots;
+    private SingleReactiveProperty<int> _numberOfBots = new();
 
     private List<Task> _taskPool = new();
     private List<Task> _issueTasks = new();
-    private List<AmountOfResources> _priceList = new();
+    private Dictionary<Price, AmountOfResources> _priceList = new();
     private List<CollectorBotAI> _poolOfIdleCollectorBots = new();
     private List<CollectorBotAI> _poolOfWorkingCollectorBots = new();
 
@@ -36,10 +35,11 @@ public class MainBaseAI : Building
     protected override void Start()
     {
         base.Start();
+        _gatheringPoint = GetComponentInChildren<GatheringPoint>();
         StartInicialization();
     }
 
-    public void SubtarctResources(AmountOfResources amount)                 // Перенести в Store?
+    public void SubtractResources(AmountOfResources amount)                 // Перенести в Store?
     {
         _store.ReduceFood(amount.Food);
         _store.ReduceTimber(amount.Timber);
@@ -76,14 +76,9 @@ public class MainBaseAI : Building
         _buildingPanelUI.UnLinkBase(this);
     }
 
-    public AmountOfResources GetPriceOf(SelectableObject obj)                       // Вынести в отдельную сущность
+    public AmountOfResources GetPriceOf(Price price)                       // Вынести в отдельную сущность
     {
-        if (obj is MainBaseAI)
-            return _priceList[0];
-        else if (obj is Barack)
-            return _priceList[1];
-        else
-            return _priceList[2];
+        return _priceList[price];
     }
 
     public void CreateCollectorBot()
@@ -93,7 +88,7 @@ public class MainBaseAI : Building
         collectorBot.transform.position = transform.position;
         collectorBot.transform.SetParent(transform.parent);
         collectorBot.SetBaseAffiliation(this);
-        collectorBot.GoTo(_gatheringPoint.position);
+        collectorBot.GoTo(_gatheringPoint.transform.position);
         _poolOfIdleCollectorBots.Add(collectorBot);
         _numberOfBots.Value++;
     }
@@ -101,6 +96,7 @@ public class MainBaseAI : Building
     public void AddNewTask(Task newTask)
     {
         bool taskIsAdded = false;
+        newTask.Completed += OnTaskCompleted;
 
         if (_taskPool.Count < 1)
         {
@@ -148,7 +144,7 @@ public class MainBaseAI : Building
     }
 
     // Функция ожидания выполнения условий
-    private void WaitingForConditionsForConstruction(int number)
+    private void WaitingForConditionsForConstruction(int number)            // Перенести в CheckingForConditionsForConstruction ??
     {
         if (CheckingForConditionsForConstruction())
         {
@@ -162,17 +158,45 @@ public class MainBaseAI : Building
     // Функция проверки необходимых условий
     private bool CheckingForConditionsForConstruction()
     {
-        var amountOfResources = _store.AmountOfResources;
-        return amount.Food >= price.Food && amount.Timber >= price.Timber && amount.Marble >= price.Marble;
+        var amountOfResources = _store.AmountOfResources;               // Нужно кэшировать
+
+        if (amountOfResources.Food >= _priceList[Price.MainBase].Food &&
+            amountOfResources.Timber >= _priceList[Price.MainBase].Timber &&
+            amountOfResources.Marble >= _priceList[Price.MainBase].Marble &&
+            _numberOfBots.Value > 0)                                                        // Magic
+        {
+            AddNewTask(new Task(0, TypesOfTasks.Constructing, _scheduleBuilding));                       // Magic
+            _scheduleBuilding = null;
+            SubtractResources(_priceList[Price.MainBase]);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public void SetTransferBot(CollectorBotAI bot)
+    {
+        //Debug.Log("Count bot before settransfer: " + _numberOfBots.Value);                     //+++++++++++++++++++++++++++
+        bot.TaskCompleted += OnCollectorBotTaskCompleted;
+        bot.SetBaseAffiliation(this);
+        _poolOfIdleCollectorBots.Add(bot);
+        _numberOfBots.Value++;
+        //Debug.Log("Count bot after settransfer: " + _numberOfBots.Value);                     //+++++++++++++++++++++++++++
+        //Debug.Log("_gatheringPoint " + _gatheringPoint == null);                            //+++++++++++++++++++++++++++
+        //Debug.Log(" bot " + bot == null);                            //+++++++++++++++++++++++++++
+        //bot.GoTo(_gatheringPoint.transform.position);
     }
 
     private void TransferCollectorBot(BuildingUnderConstruction newBase, CollectorBotAI bot)                   // Передать бота
     {
-        newBase.SetBot(bot);
-        bot.TaskCompleted -= OnCollectorBotTaskCompleted;
-        bot.SetBaseAffiliation(this);
         _poolOfIdleCollectorBots.Remove(bot);
         _poolOfWorkingCollectorBots.Remove(bot);
+        _numberOfBots.Value--;
+        newBase.SetTransferBot(bot);
+        bot.TaskCompleted -= OnCollectorBotTaskCompleted;
+        //bot.SetBaseAffiliation(newBase);
     }
 
     private void OnTaskCompleted(Task task)
@@ -191,28 +215,23 @@ public class MainBaseAI : Building
         _selectionIndicator.localScale = Vector3.one * 0.5f;                                    // Magical ???
         _resourceScaner = new ResourceScaner(_map);
         _prefabCollectorBot = Resources.Load<CollectorBotAI>("Prefabs/CollectorBot");
-        StartPriceList();
+        CreateStartingPriceList();
         _resourceScaning = StartCoroutine(ResourceScanning());
         StartCoroutine(StartInitialization());
     }
 
-    private void StartPriceList()                                                       // Прайс лист вынести в отдельную сущность
+    private void CreateStartingPriceList()                                                       // Прайс лист вынести в отдельную сущность
     {
-        AmountOfResources mainbase = new AmountOfResources();
-        mainbase.Food = 1;
-        mainbase.Timber = 1;
-        mainbase.Marble = 1;
-        _priceList.Add(mainbase);
-        AmountOfResources baracks = new AmountOfResources();
-        baracks.Food = 1;
-        baracks.Timber = 1;
-        baracks.Marble = 1;
-        _priceList.Add(baracks);
-        AmountOfResources bot = new AmountOfResources();
-        bot.Food = 1;
-        bot.Timber = 1;
-        bot.Marble = 0;
-        _priceList.Add(bot);
+        AmountOfResources mainBasePrice = new AmountOfResources();
+        mainBasePrice.Food = 0;
+        mainBasePrice.Timber = 0;
+        mainBasePrice.Marble = 0;
+        _priceList.Add(Price.MainBase, mainBasePrice);
+        AmountOfResources botPrice = new AmountOfResources();
+        botPrice.Food = 1;
+        botPrice.Timber = 1;
+        botPrice.Marble = 0;
+        _priceList.Add(Price.CollectorBot, botPrice);
     }
 
     private void OnCollectorBotTaskCompleted(CollectorBotAI bot)
@@ -258,9 +277,11 @@ public class MainBaseAI : Building
                 if (contains)
                     continue;
 
-                Task task = new Task(1, TypesOfTasks.Harvesting, allResources[i] as Resource);               // Magic
-                task.Completed += OnTaskCompleted;
-                AddNewTask(task);
+                //Task task = new Task(1, TypesOfTasks.Harvesting, allResources[i] as Resource);               // Magic
+                //task.Completed += OnTaskCompleted;                                                          // Дублирование
+
+                if (allResources[i].IsOccupied == false)
+                    AddNewTask(new Task(1, TypesOfTasks.Harvesting, allResources[i] as Resource));               // Magic
             }
         }
     }
@@ -274,9 +295,33 @@ public class MainBaseAI : Building
             if (_taskPool.Count < 1 || _poolOfIdleCollectorBots.Count < 1)
                 break;
 
-            _poolOfIdleCollectorBots[0].SetTask(GetTask());
-            _poolOfWorkingCollectorBots.Add(_poolOfIdleCollectorBots[0]);
-            _poolOfIdleCollectorBots.RemoveAt(0);
+            var task = GetTask();
+
+            if (task.TypeOfTask == TypesOfTasks.Harvesting)
+            {
+                if ((task.Target as IResource).IsOccupied == false)
+                {
+                    (task.Target as IResource).Occupy();
+                }
+                else
+                {
+                    OnTaskCompleted(task);
+                    continue;
+                }
+            }
+
+            _poolOfIdleCollectorBots[0].SetTask(task);
+            // Если задача на строительство базы, то передать ей свободного бота
+            if (task.TypeOfTask == TypesOfTasks.Constructing)
+            {
+                TransferCollectorBot(task.Target as BuildingUnderConstruction, _poolOfIdleCollectorBots[0]);
+            }
+            else
+            {
+                //_poolOfIdleCollectorBots[0].SetTask(GetTask());
+                _poolOfWorkingCollectorBots.Add(_poolOfIdleCollectorBots[0]);
+                _poolOfIdleCollectorBots.RemoveAt(0);
+            }
         }
     }
 

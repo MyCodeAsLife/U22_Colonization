@@ -20,6 +20,38 @@ public class CollectorBotAI : ChangingObject
         _interactableObjectMask = LayerMask.NameToLayer("Interactable");
     }
 
+    private void OnTriggerEnter(Collider other)                 // Переделать под сравнения на тип текущей задачи
+    {
+        if (_task != null && other.gameObject.layer == _interactableObjectMask)                                  // Приделать состояние задач, и в зависимости от задачи к Action подключать нужную функцию
+        {
+            var obj = other.GetComponent<SelectableObject>();
+
+            if (/*obj is IResource*/_task.TypeOfTask == TypesOfTasks.Harvesting && _haveCollectedResource == false && obj is IResource /*&& _task != null*/)              // Если задание на сбор
+            {
+                if ((_task.Target as IResource).GetId() == (obj as IResource).GetId())
+                {
+                    _mover.Stop();
+                    CurrentAction = StartCoroutine(PerformingAnAction(Collecting));
+                }
+            }
+            else if (_haveCollectedResource && obj is MainBaseAI && obj as MainBaseAI == _mainBase)                                   // Если задание на перенос
+            {
+                _mover.Stop();
+                StoreResource(_task.Target as IResource);
+                OnMoveCompleted();
+            }
+            else if (_task.TypeOfTask == TypesOfTasks.Constructing && obj is BuildingUnderConstruction)       // Если задание на строительство
+            {
+                var building = obj as BuildingUnderConstruction;
+                _mover.Stop();
+                CurrentAction = StartCoroutine(PerformingAnAction(Constructing));
+                //ActionProgress.Value = building.GetActionProgress();
+                building.StartConstruction(this);
+                //Debug.Log(building.GetActionProgress());                                            //+++++++++++++++++++++++++
+            }
+        }
+    }
+
     private void OnEnable()
     {
         CurrentAction = null;
@@ -76,50 +108,24 @@ public class CollectorBotAI : ChangingObject
             (_task.Target as BuildingUnderConstruction).StopConstruction(this);
     }
 
-    protected void TaskComplete()
+    protected void CompleteTask()
     {
         _task.Complete();
         _task = null;
     }
 
-    private void OnTriggerEnter(Collider other)                 // Переделать под сравнения на тип текущей задачи
+    private void OnTaskCompleted(Task task)
     {
-        if (_task != null && other.gameObject.layer == _interactableObjectMask)                                  // Приделать состояние задач, и в зависимости от задачи к Action подключать нужную функцию
-        {
-            var obj = other.GetComponent<SelectableObject>();
-
-            if (/*obj is IResource*/_task.TypeOfTask == TypesOfTasks.Harvesting && _haveCollectedResource == false && obj is IResource /*&& _task != null*/)              // Если задание на сбор
-            {
-                if ((_task.Target as IResource).GetId() == (obj as IResource).GetId())
-                {
-                    _mover.Stop();
-                    CurrentAction = StartCoroutine(PerformingAnAction(Collecting));
-                }
-            }
-            else if (_haveCollectedResource && obj is MainBaseAI && obj as MainBaseAI == _mainBase)                                   // Если задание на перенос
-            {
-                _mover.Stop();
-                StoreResource(_task.Target as IResource);
-                OnMoveCompleted();
-            }
-            else if (_task.TypeOfTask == TypesOfTasks.Constructing && obj is BuildingUnderConstruction)       // Если задание на строительство
-            {
-                var building = obj as BuildingUnderConstruction;
-                _mover.Stop();
-                CurrentAction = StartCoroutine(PerformingAnAction(Constructing));
-                //ActionProgress.Value = building.GetActionProgress();
-                building.StartConstruction(this);
-                //Debug.Log(building.GetActionProgress());                                            //+++++++++++++++++++++++++
-            }
-        }
+        _task = null;
+        //OnMoveCompleted();
     }
 
     private void StoreResource(IResource resource)
     {
         _haveCollectedResource = false;
-        _mainBase.StoreResource(resource.GetResourceType());
+        _mainBase.Store.StoreResource(resource.GetResourceType());
         resource.Delete();
-        TaskComplete();
+        CompleteTask();
     }
 
     private void OnMoveCompleted()
@@ -145,7 +151,7 @@ public class CollectorBotAI : ChangingObject
     {
         var building = _task.Target as BuildingUnderConstruction;
         building.CompleteConstruction(this);
-        TaskComplete();
+        CompleteTask();
         OnMoveCompleted();
     }
 }

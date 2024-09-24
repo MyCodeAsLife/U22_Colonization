@@ -1,9 +1,12 @@
+using System;
 using UnityEngine;
 
 public class SelectableObject : MonoBehaviour
 {
     protected Transform _prefabSelectionIndicator;
     protected Transform _selectionIndicator;
+
+    public event Action Destroyed;
 
     protected virtual void Awake()
     {
@@ -30,5 +33,10 @@ public class SelectableObject : MonoBehaviour
     public virtual void UnSelect()
     {
         _selectionIndicator.gameObject.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        Destroyed?.Invoke();
     }
 }

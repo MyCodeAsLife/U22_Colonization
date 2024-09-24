@@ -17,7 +17,32 @@ public class Store : IStore
         _amountOfResources.Marble = 0;
     }
 
-    public void AddFood(int amount)
+    public void StoreResource(ResourceType resourceType)
+    {
+        switch (resourceType)
+        {
+            case ResourceType.Food:
+                AddFood(1);
+                break;
+
+            case ResourceType.Timber:
+                AddTimber(1);
+                break;
+
+            case ResourceType.Marble:
+                AddMarble(1);
+                break;
+        }
+    }
+
+    public void SubtractResources(AmountOfResources amount)                 // Перенести в Store?
+    {
+        ReduceFood(amount.Food);
+        ReduceTimber(amount.Timber);
+        ReduceMarble(amount.Marble);
+    }
+
+    private void AddFood(int amount)
     {
         if (amount > 0)
         {
@@ -26,7 +51,7 @@ public class Store : IStore
         }
     }
 
-    public void AddTimber(int amount)
+    private void AddTimber(int amount)
     {
         if (amount > 0)
         {
@@ -35,7 +60,7 @@ public class Store : IStore
         }
     }
 
-    public void AddMarble(int amount)
+    private void AddMarble(int amount)
     {
         if (amount > 0)
         {
@@ -44,7 +69,7 @@ public class Store : IStore
         }
     }
 
-    public void ReduceFood(int amount)
+    private void ReduceFood(int amount)
     {
         if (amount > 0)
         {
@@ -53,7 +78,7 @@ public class Store : IStore
         }
     }
 
-    public void ReduceTimber(int amount)
+    private void ReduceTimber(int amount)
     {
         if (amount > 0)
         {
@@ -62,7 +87,7 @@ public class Store : IStore
         }
     }
 
-    public void ReduceMarble(int amount)
+    private void ReduceMarble(int amount)
     {
         if (amount > 0)
         {
@@ -71,8 +96,8 @@ public class Store : IStore
         }
     }
 
-    AmountOfResources IStore.GetAmountOfResources()
-    {
-        return _amountOfResources;
-    }
+    //AmountOfResources IStore.GetAmountOfResources()
+    //{
+    //    return _amountOfResources;
+    //}
 }

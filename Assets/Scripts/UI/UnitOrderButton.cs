@@ -6,10 +6,10 @@ public class UnitOrder : OrderButton
     {
         AmountOfResources price = _currentBuilding.GetPriceOf(objectPrice);
 
-        if (CheckPriceAvailability(_currentBuilding.Store.GetAmountOfResources(), price))
+        if (CheckPriceAvailability(_currentBuilding.Store.AmountOfResources, price))
         {
             Debug.Log("Денег на юнит достаточно.");                                 // ++++++++++++++++++++
-            _currentBuilding.SubtractResources(price);
+            _currentBuilding.Store.SubtractResources(price);
             _currentBuilding.CreateCollectorBot();
         }
         else

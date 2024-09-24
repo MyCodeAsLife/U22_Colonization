@@ -17,7 +17,7 @@ public class Resource : SelectableObject, IResource
 
     public void Occupy()
     {
-        if (IsOccupied == false)
+        if (IsOccupied == false)                // Данная проверка излишня ??
             IsOccupied = true;
     }
 

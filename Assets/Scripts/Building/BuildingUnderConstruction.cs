@@ -61,7 +61,7 @@ public class BuildingUnderConstruction : Building
             case BuildingType.MainBase:
                 building = transform.AddComponent<MainBaseAI>();
                 // Передать бота новой базе
-                building.GetComponent<MainBaseAI>().SetTransferBot(_transferBot);
+                building.GetComponent<MainBaseAI>().ReceiveCollectorBot(_transferBot);
                 break;
 
             case BuildingType.Barack:

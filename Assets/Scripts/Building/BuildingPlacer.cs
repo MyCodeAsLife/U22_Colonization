@@ -11,7 +11,7 @@ public class BuildingPlacer : MonoBehaviour
     //[SerializeField] private BuildingUnderConstruction _planedBuilding;                                   // ++++++++++++
     private BuildingUnderConstruction _flyingBuilding;
     private Dictionary<Vector2Int, Building> _buildingsPositions = new();
-    private MainBaseAI _selectedInteractiveObject;                              // Если длать разные типы объектов у которых будут кнопки, то здесь нужен универсальный
+    private MainBaseAI _selectedInteractiveObject;                              // Если делать разные типы объектов у которых будут кнопки, то здесь нужен универсальный
     private int _roundPosX;
     private int _roundPosZ;
     private bool _canBePlaced;
@@ -63,40 +63,8 @@ public class BuildingPlacer : MonoBehaviour
 
         if (_flyingBuilding != null && _canBePlaced)
         {
-            // Проверить есть ли уже намеченное строительство чтобы переставить метку или создать новую метку
-            //if (_planedBuilding == null)
-            //{
-            //    _planedBuilding = _flyingBuilding;
-            //    _flyingBuilding = null;
-            //    RecordLocationBuilding(new Vector2Int(_roundPosX, _roundPosZ), _planedBuilding);                // Записывать координаты при начале строительства
-            //    _controlSysytem.InputActions.Mouse.Delta.started -= OnMouseMove;
-            //    _controlSysytem.InputActions.Mouse.LeftButtonClick.performed -= OnMouseLeftButtonClick;
-            //    //if (_selectedInteractiveObject != null)                                                               // Здесь может быть null ????
-            //        //_selectedInteractiveObject.AddNewTask(new Task(0, TypesOfTasks.Constructing, _planedBuilding));        // Задачу на начало строительство создавать в MainBase
-            //    float newPosY = _planedBuilding.transform.position.y - _planedBuilding.transform.localScale.y * 2;        // Magic и Дублирование
-            //    _planedBuilding.SetEndPosition(_planedBuilding.transform.position);
-            //    _planedBuilding.transform.position = new Vector3(_planedBuilding.transform.position.x, newPosY, _planedBuilding.transform.position.z);
-            //    _planedBuilding.SetStartPosition(_planedBuilding.transform.position);
-            //    _selectedInteractiveObject.ScheduleConstruction(_planedBuilding);
-            //}
-            //else if (_planedBuilding.IsBuildingInProgress)         // Если здание уже строится то ничего не делать
-            //{
-            //    Destroy(_flyingBuilding.gameObject);
-            //    _flyingBuilding = null;
-            //}
-            //else  // Переставить метку строительства
-            //{
-            //    float newPosY = _planedBuilding.transform.position.y - _planedBuilding.transform.localScale.y * 2;        // Magic и Дублирование
-            //    _planedBuilding.SetEndPosition(_planedBuilding.transform.position);
-            //    _planedBuilding.transform.position = new Vector3(_planedBuilding.transform.position.x, newPosY, _planedBuilding.transform.position.z);
-            //    _planedBuilding.SetStartPosition(_planedBuilding.transform.position);
-            //}
-
             _controlSysytem.InputActions.Mouse.Delta.started -= OnMouseMove;
             _controlSysytem.InputActions.Mouse.LeftButtonClick.performed -= OnMouseLeftButtonClick;
-
-            //if (_selectedInteractiveObject != null)                                                               // Здесь может быть null ????
-            //_selectedInteractiveObject.AddNewTask(new Task(0, TypesOfTasks.Constructing, _planedBuilding));        // Задачу на начало строительство создавать в MainBase
 
             float newPosY = _flyingBuilding.transform.position.y - _flyingBuilding.transform.localScale.y * 2;        // Magic
             _flyingBuilding.SetEndPosition(_flyingBuilding.transform.position);
@@ -104,7 +72,9 @@ public class BuildingPlacer : MonoBehaviour
             _flyingBuilding.SetStartPosition(_flyingBuilding.transform.position);
             _flyingBuilding.SetRoundPosition(new Vector2Int(_roundPosX, _roundPosZ));
             _flyingBuilding.BuildingStarted += OnStartBuilding;
-            _selectedInteractiveObject.ScheduleConstruction(_flyingBuilding);
+            //_flyingBuilding.gameObject.SetActive(false);
+            //_selectedInteractiveObject.ScheduleConstruction(_flyingBuilding);
+            _selectedInteractiveObject.TaskManager.ScheduleConstruction(_flyingBuilding);
             _flyingBuilding = null;
         }
     }

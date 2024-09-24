@@ -13,9 +13,9 @@ public class ResourceScaner
         _scanningArea = new Vector3(map.localScale.x * PlaneScale, map.localScale.y * PlaneScale, map.localScale.z * PlaneScale);
     }
 
-    public IList<IResource> MapScaning()
+    public List<IResource> MapScaning()
     {
-        IList<IResource> list = new List<IResource>();
+        List<IResource> list = new List<IResource>();
         Collider[] hits = Physics.OverlapBox(Vector3.zero, _scanningArea, Quaternion.identity, int.MaxValue ^ _selectMask);
 
         foreach (Collider hit in hits)

@@ -89,7 +89,7 @@ public class DownPanelUI : MonoBehaviour
 
     private void ChangeResourcesNumber(MainBaseAI mainBase)
     {
-        AmountOfResources amountOfResources = mainBase.Store.GetAmountOfResources();
+        AmountOfResources amountOfResources = mainBase.Store.AmountOfResources;
 
         OnChangeNumberOfFood(amountOfResources.Food);
         OnChangeNumberOfTimber(amountOfResources.Timber);

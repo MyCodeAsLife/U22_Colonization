@@ -27,7 +27,11 @@ public class ChangingObject : SelectableObject
 
     protected virtual void StopAction()
     {
-        StopCoroutine(CurrentAction);
+        Debug.Log("Stop Action");
+
+        if (CurrentAction != null)
+            StopCoroutine(CurrentAction);
+
         CurrentAction = null;
     }
 

@@ -27,12 +27,13 @@ public class TaskManager : MonoBehaviour
     private void Start()
     {
         _mainBase = GetComponent<MainBaseAI>();
+        _store = _mainBase.Store;
     }
 
-    public void SetStore(IStore store)
-    {
-        _store = store;
-    }
+    //public void SetStore(IStore store)                              // ----------------------------Çהוסü מרטבךא----------
+    //{
+    //    _store = store;
+    //}
 
     public void AddResourceScaner(ResourceScaner resourceScaner)
     {
@@ -196,8 +197,8 @@ public class TaskManager : MonoBehaviour
                 task = GetHarvestTask();
             }
 
-            Debug.Log(_poolOfIdleCollectorBots.Count);                  //++++++++++++++++++++++++
-            Debug.Log(task == null);                                  //++++++++++++++++++++++++
+            //Debug.Log(_poolOfIdleCollectorBots.Count);                  //++++++++++++++++++++++++
+            //Debug.Log(task == null);                                  //++++++++++++++++++++++++
 
             if (task != null)
             {

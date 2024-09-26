@@ -60,7 +60,7 @@ public class CollectorBotAI : ChangingObject
             StoreResource(task.Target as IResource);
 
         _task = task;
-        GoTo(task.Target.transform.position);
+        GoTo(task.Target.transform.position);                          // Ошибка здесь, _task ссылается на объект которого нет? проверять на disable?
     }
 
     public void SetBaseAffiliation(MainBaseAI mainBase)
@@ -76,9 +76,9 @@ public class CollectorBotAI : ChangingObject
             (_task.Target as BuildingUnderConstruction).StopConstruction(this);
     }
 
-    protected void TaskComplete()
+    protected void TaskComplete()                       // Упразднить
     {
-        _task.Complete();
+        //_task.Complete();
         _task = null;
     }
 
@@ -127,7 +127,7 @@ public class CollectorBotAI : ChangingObject
         if (_task == null)
             TaskCompleted?.Invoke(this);
         else if (_haveCollectedResource == false && _task != null)
-            GoTo(_task.Target.transform.position);
+            GoTo(_task.Target.transform.position);                          // Ошибка здесь, _task ссылается на объект которого нет? проверять на disable?
         else
             GoTo(_mainBase.transform.position);
     }

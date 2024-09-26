@@ -81,8 +81,14 @@ public class PlayerControlSystem : MonoBehaviour
 
                 if (_hovered != obj)
                 {
-                    _hovered?.OnUnhover();
+                    if (_hovered != null)
+                    {
+                        _hovered.OnUnhover();
+                        _hovered.Destroyed -= OnDestroyObject;
+                    }
+
                     _hovered = obj;
+                    _hovered.Destroyed += OnDestroyObject;
                     _hovered.OnHover();
                 }
             }
@@ -105,6 +111,13 @@ public class PlayerControlSystem : MonoBehaviour
 
     private void OnReleaseCtrl(InputAction.CallbackContext context) => _states.PresedCtrl = false;
     private void OnPressCtrl(InputAction.CallbackContext context) => _states.PresedCtrl = true;
+
+    private void OnDestroyObject()
+    {
+        Unselect(_hovered);
+        _listOfSelected.Remove(_hovered);
+        _hovered = null;
+    }
 
     private void OnMouseMove(InputAction.CallbackContext context)
     {

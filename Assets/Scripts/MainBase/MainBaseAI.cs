@@ -16,8 +16,9 @@ public class MainBaseAI : Building
     private BuildingUnderConstruction _scheduleBuilding;
     private SingleReactiveProperty<int> _numberOfBots = new();
 
+    private IList<IResource> _resourcePool;
     private List<Task> _taskPool = new();
-    private List<Task> _issueTasks = new();
+    //private List<Task> _issueTasks = new();
     private Dictionary<Price, AmountOfResources> _priceList = new();
     private List<CollectorBotAI> _poolOfIdleCollectorBots = new();
     private List<CollectorBotAI> _poolOfWorkingCollectorBots = new();
@@ -96,7 +97,7 @@ public class MainBaseAI : Building
     public void AddNewTask(Task newTask)
     {
         bool taskIsAdded = false;
-        newTask.Completed += OnTaskCompleted;
+        //newTask.Completed += OnTaskCompleted;
 
         if (_taskPool.Count < 1)
         {
@@ -199,13 +200,19 @@ public class MainBaseAI : Building
         //bot.SetBaseAffiliation(newBase);
     }
 
-    private void OnTaskCompleted(Task task)
+    //private void OnTaskCompleted(Task task)
+    //{
+    //    if (_issueTasks.Contains(task))
+    //    {
+    //        _issueTasks.Remove(task);
+    //        //task.Completed -= OnTaskCompleted;
+    //    }
+    //}
+
+    private void OnCollectorBotTaskCompleted(CollectorBotAI bot)
     {
-        if (_issueTasks.Contains(task))
-        {
-            _issueTasks.Remove(task);
-            task.Completed -= OnTaskCompleted;
-        }
+        _poolOfWorkingCollectorBots.Remove(bot);
+        _poolOfIdleCollectorBots.Add(bot);
     }
 
     private void StartInicialization()
@@ -223,9 +230,9 @@ public class MainBaseAI : Building
     private void CreateStartingPriceList()                                                       // Прайс лист вынести в отдельную сущность
     {
         AmountOfResources mainBasePrice = new AmountOfResources();
-        mainBasePrice.Food = 0;
-        mainBasePrice.Timber = 0;
-        mainBasePrice.Marble = 0;
+        mainBasePrice.Food = 3;
+        mainBasePrice.Timber = 3;
+        mainBasePrice.Marble = 3;
         _priceList.Add(Price.MainBase, mainBasePrice);
         AmountOfResources botPrice = new AmountOfResources();
         botPrice.Food = 1;
@@ -234,56 +241,72 @@ public class MainBaseAI : Building
         _priceList.Add(Price.CollectorBot, botPrice);
     }
 
-    private void OnCollectorBotTaskCompleted(CollectorBotAI bot)
-    {
-        _poolOfWorkingCollectorBots.Remove(bot);
-        _poolOfIdleCollectorBots.Add(bot);
-    }
+    //private void FindResources()                                // переделать для корректной работы с несколькими независимыми базами на карте
+    //{
+    //    var allResources = _resourceScaner.MapScaning();
 
-    private void FindFreeResources()                                // переделать для корректной работы с несколькими независимыми базами на карте
-    {
-        var allResources = _resourceScaner.MapScaning();
+    //    for (int i = 0; i < allResources.Count; i++)
+    //    {
+    //        bool contains = false;
 
-        for (int i = 0; i < allResources.Count; i++)
+    //        for (int j = 0; j < _taskPool.Count; j++)
+    //        {
+    //            if (_taskPool[j].Target is IResource)
+    //            {
+    //                if ((_taskPool[j].Target as IResource).GetId() == allResources[i].GetId())
+    //                {
+    //                    contains = true;
+    //                    break;
+    //                }
+    //            }
+    //        }
+
+    //        if (contains == false)
+    //        {
+    //            for (int j = 0; j < _issueTasks.Count; j++)
+    //            {
+    //                if (_issueTasks[j].Target is IResource)
+    //                {
+    //                    if ((_issueTasks[j].Target as IResource).GetId() == allResources[i].GetId())
+    //                    {
+    //                        contains = true;
+    //                        break;
+    //                    }
+    //                }
+    //            }
+
+    //            if (contains)
+    //                continue;
+
+    //            //Task task = new Task(1, TypesOfTasks.Harvesting, allResources[i] as Resource);               // Magic
+    //            //task.Completed += OnTaskCompleted;                                                          // Дублирование
+
+    //            if (allResources[i].IsOccupied == false)
+    //                AddNewTask(new Task(1, TypesOfTasks.Harvesting, allResources[i] as Resource));               // Magic
+    //        }
+    //    }
+    //}
+
+    //private Task GetTask()
+    //{
+    //    Task task = _taskPool[0];
+    //    _issueTasks.Add(task);
+    //    _taskPool.RemoveAt(0);
+    //    return task;
+    //}
+
+    private Task GetHarvestTask()
+    {
+        for (int i = 0; i < _resourcePool.Count; i++)
         {
-            bool contains = false;
-
-            for (int j = 0; j < _taskPool.Count; j++)
+            if (_resourcePool[i].IsOccupied == false && (_resourcePool[i] as Resource).gameObject.activeSelf)
             {
-                if (_taskPool[j].Target is IResource)
-                {
-                    if ((_taskPool[j].Target as IResource).GetId() == allResources[i].GetId())
-                    {
-                        contains = true;
-                        break;
-                    }
-                }
-            }
-
-            if (contains == false)
-            {
-                for (int j = 0; j < _issueTasks.Count; j++)
-                {
-                    if (_issueTasks[j].Target is IResource)
-                    {
-                        if ((_issueTasks[j].Target as IResource).GetId() == allResources[i].GetId())
-                        {
-                            contains = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (contains)
-                    continue;
-
-                //Task task = new Task(1, TypesOfTasks.Harvesting, allResources[i] as Resource);               // Magic
-                //task.Completed += OnTaskCompleted;                                                          // Дублирование
-
-                if (allResources[i].IsOccupied == false)
-                    AddNewTask(new Task(1, TypesOfTasks.Harvesting, allResources[i] as Resource));               // Magic
+                _resourcePool[i].Occupy();
+                return new Task(1, TypesOfTasks.Harvesting, _resourcePool[i] as Resource);               // Magic
             }
         }
+
+        return null;
     }
 
     private void DistributeTasks()
@@ -292,45 +315,57 @@ public class MainBaseAI : Building
 
         while (isWork)
         {
-            if (_taskPool.Count < 1 || _poolOfIdleCollectorBots.Count < 1)
+            //if (_taskPool.Count < 1 || _poolOfIdleCollectorBots.Count < 1)
+            //    break;
+
+            //var task = GetTask();
+
+            //if (task.TypeOfTask == TypesOfTasks.Harvesting)
+            //{
+            //    if ((task.Target as IResource).IsOccupied == false)
+            //    {
+            //        (task.Target as IResource).Occupy();
+            //    }
+            //    else
+            //    {
+            //        OnTaskCompleted(task);
+            //        continue;
+            //    }
+            //}
+
+            if (_poolOfIdleCollectorBots.Count < 1 || (_taskPool.Count < 1 && _resourcePool.Count < 1))
                 break;
 
-            var task = GetTask();
+            Task task = null;
 
-            if (task.TypeOfTask == TypesOfTasks.Harvesting)
+            if (_taskPool.Count != 0)
             {
-                if ((task.Target as IResource).IsOccupied == false)
-                {
-                    (task.Target as IResource).Occupy();
-                }
-                else
-                {
-                    OnTaskCompleted(task);
-                    continue;
-                }
-            }
-
-            _poolOfIdleCollectorBots[0].SetTask(task);
-            // Если задача на строительство базы, то передать ей свободного бота
-            if (task.TypeOfTask == TypesOfTasks.Constructing)
-            {
-                TransferCollectorBot(task.Target as BuildingUnderConstruction, _poolOfIdleCollectorBots[0]);
+                task = _taskPool[0];
+                _taskPool.RemoveAt(0);
             }
             else
             {
-                //_poolOfIdleCollectorBots[0].SetTask(GetTask());
-                _poolOfWorkingCollectorBots.Add(_poolOfIdleCollectorBots[0]);
-                _poolOfIdleCollectorBots.RemoveAt(0);
+                task = GetHarvestTask();
+            }
+
+            if (task != null /*&& task.Target.gameObject.activeSelf*/)                      // Теперь ошибка здесь...
+            {
+                Debug.Log(task.Target.name);                                            //++++++++++++++++++++++++++++++++++++++
+
+                _poolOfIdleCollectorBots[0].SetTask(task);
+                // Если задача на строительство базы, то передать ей свободного бота
+                if (task.TypeOfTask == TypesOfTasks.Constructing)
+                {
+                    TransferCollectorBot(task.Target as BuildingUnderConstruction, _poolOfIdleCollectorBots[0]);
+                }
+                else
+                {
+                    //_poolOfIdleCollectorBots[0].SetTask(GetTask());
+                    _poolOfWorkingCollectorBots.Add(_poolOfIdleCollectorBots[0]);
+                    _poolOfIdleCollectorBots.RemoveAt(0);
+                }
             }
         }
-    }
-
-    private Task GetTask()
-    {
-        Task task = _taskPool[0];
-        _issueTasks.Add(task);
-        _taskPool.RemoveAt(0);
-        return task;
     }
 
     private IEnumerator ResourceScanning()
@@ -341,7 +376,8 @@ public class MainBaseAI : Building
         while (isWork)
         {
             yield return new WaitForSeconds(Delay);
-            FindFreeResources();
+            //FindResources();
+            _resourcePool = _resourceScaner.MapScaning();
             DistributeTasks();
         }
 

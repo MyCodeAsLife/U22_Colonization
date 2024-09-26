@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class SelectableObject : MonoBehaviour
@@ -5,11 +6,18 @@ public class SelectableObject : MonoBehaviour
     protected Transform _prefabSelectionIndicator;
     protected Transform _selectionIndicator;
 
+    public event Action Destroyed;
+
     protected virtual void Awake()
     {
         _prefabSelectionIndicator = Resources.Load<Transform>("Prefabs/SelectionIndicator");
         _selectionIndicator = Instantiate(_prefabSelectionIndicator, transform);
         _selectionIndicator.gameObject.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        Destroyed?.Invoke();
     }
 
     public virtual void OnHover()

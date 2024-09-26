@@ -1,4 +1,4 @@
-using System;
+//using System;
 
 public class Task
 {
@@ -6,7 +6,7 @@ public class Task
     public TypesOfTasks TypeOfTask { get; private set; }
     public SelectableObject Target { get; private set; }
 
-    public event Action<Task> Completed;
+    //public event Action<Task> Completed;
 
     public Task(int priority, TypesOfTasks typeOfTask, SelectableObject target)
     {
@@ -15,8 +15,8 @@ public class Task
         Target = target;
     }
 
-    public void Complete()
-    {
-        Completed?.Invoke(this);
-    }
+    //public void Complete()
+    //{
+    //    Completed?.Invoke(this);
+    //}
 }

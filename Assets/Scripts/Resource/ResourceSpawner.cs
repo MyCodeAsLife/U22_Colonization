@@ -1,13 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.AI.Navigation;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class ResourceSpawner : MonoBehaviour
 {
     [SerializeField] private Transform _map;
-    [SerializeField] private NavMeshSurface _navMesh;                       //++
+
     private ResourceSpawnerBase _foodSpawner;
     private ResourceSpawnerBase _timberSpawner;
     private ResourceSpawnerBase _marbleSpawner;
@@ -100,16 +99,8 @@ public class ResourceSpawner : MonoBehaviour
         {
             yield return delay;
             isWork = true;
-
-            //float posX = Random.Range(-_mapX, _mapX);
-            //float posZ = Random.Range(-_mapZ, _mapZ);
-            //Vector3 spawnPos = new Vector3(posX, 0f, posZ);
             Vector3 checkArea = new Vector3(3, 3, 3);                               // Magic
             Vector3 spawnPos = Vector3.zero;
-            //var res = resourceSpawner.Spawn(/*spawnPos*/);
-
-            //res.transform.position = spawnPos;
-            //res.gameObject.SetActive(true);
 
             while (isWork)
             {
@@ -124,13 +115,9 @@ public class ResourceSpawner : MonoBehaviour
                     isWork = false;
             }
 
-            //res.transform.position = spawnPos;
-            //res.gameObject.SetActive(true);
             resourceSpawner.Spawn(spawnPos, _idCounter);
             _idCounter++;
         }
-
-        //_navMesh?.BuildNavMesh();                                                                        // +++++
     }
 
     private IEnumerator InitialResourceSpawn()

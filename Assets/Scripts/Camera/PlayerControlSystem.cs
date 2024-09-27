@@ -9,24 +9,25 @@ using UnityEngine.UI;
 [RequireComponent(typeof(BuildingPlacer))]
 public class PlayerControlSystem : MonoBehaviour
 {
+    [SerializeField] private Image _frameImage;
+
     private int _selectionMask;
     private int _groundMask;
     private int _uiMask;
-    private CameraMover _cameraMover;
-    private BuildingPlacer _buildingPlacer;
-    private Plane _plane;
-    private PlayerControlStates _states = new();
     private Ray _ray;
+    private Plane _plane;
     private RaycastHit _hit = new();
-    private SelectableObject _hovered;
+    private PlayerControlStates _states = new();
     private List<SelectableObject> _listOfSelected = new();
     private MainInputActions _inputActions;
-    [SerializeField] private Image _frameImage;                                      // ++++++++++
-    private Vector2 _cursoreStartPosition;
-    private Vector2 _cursoreCurrentPosition;
-    private Vector2 _startPos;
-    private Vector2 _frameSize;
+    private BuildingPlacer _buildingPlacer;
     private Coroutine _frameStretching;
+    private SelectableObject _hovered;
+    private CameraMover _cameraMover;
+    private Vector2 _cursoreCurrentPosition;
+    private Vector2 _cursoreStartPosition;
+    private Vector2 _frameSize;
+    private Vector2 _startPos;
 
     public MainInputActions InputActions { get { return _inputActions; } }
 
@@ -69,10 +70,10 @@ public class PlayerControlSystem : MonoBehaviour
 
     private void LateUpdate()
     {
-        _ray = Camera.main.ScreenPointToRay(Input.mousePosition);                   // Необходимо каждый раз получать новый луч
+        _ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         _states.CursoreOverUI = EventSystem.current.IsPointerOverGameObject();
 
-        if (Physics.Raycast(_ray.origin, _ray.direction, out _hit, 100/*, _selectionMask*/ /*^ int.MaxValue*/))    // Отказывается адекватно воспринимать маску
+        if (Physics.Raycast(_ray.origin, _ray.direction, out _hit, 100))
         {
             if (_hit.collider.gameObject.layer == _selectionMask)
             {
@@ -128,8 +129,8 @@ public class PlayerControlSystem : MonoBehaviour
             _frameSize = endPos - _startPos;
             _frameImage.rectTransform.sizeDelta = _frameSize;
 
-            if (_frameStretching == null && (_frameSize.x > 10 && _frameSize.y > 10))                             // Magic - погрешность в 10 едениц
-                _frameStretching = StartCoroutine(ObjectsSelecting());
+            if (_frameStretching == null && (_frameSize.x > 10 && _frameSize.y > 10))
+                _frameStretching = StartCoroutine(ObjectSelection());
         }
     }
 
@@ -141,7 +142,7 @@ public class PlayerControlSystem : MonoBehaviour
 
     private void OnLeftMousePress(InputAction.CallbackContext context)
     {
-        if (_states.CursoreOverUI)                                  // Если нажали по UI то ничего не делать
+        if (_states.CursoreOverUI)
             return;
 
         if (_states.PresedCtrl == false && _states.HoldLeftMouseButton == false)
@@ -169,7 +170,7 @@ public class PlayerControlSystem : MonoBehaviour
         if (_hit.collider != null && _hit.collider.gameObject.layer == _groundMask)
             for (int i = 0; i < _listOfSelected.Count; i++)
                 if (_listOfSelected[i].TryGetComponent<CollectorBotAI>(out CollectorBotAI bot))
-                    bot.GoTo(_hit.point);                           // Сделать вызов движения по клику мышки через задачу ???
+                    bot.GoTo(_hit.point);
     }
 
     private void Select(SelectableObject obj)
@@ -211,7 +212,7 @@ public class PlayerControlSystem : MonoBehaviour
         _hovered = null;
     }
 
-    private IEnumerator ObjectsSelecting()               // Переименовать метод выделения
+    private IEnumerator ObjectSelection()
     {
         var delay = new WaitForEndOfFrame();
         _states.FrameStretching = true;
@@ -219,8 +220,8 @@ public class PlayerControlSystem : MonoBehaviour
         while (_states.FrameStretching && _states.HoldLeftMouseButton)
         {
             yield return delay;
-            Rect rect = new Rect(_startPos, _frameSize);                                                          // Вынести cоздание rect из цикла
-            CollectorBotAI[] allBots = FindObjectsByType<CollectorBotAI>(FindObjectsSortMode.None);             // Вынести создание массива из цикла, тяжелая операция, нежелательно выполнение в цикле.
+            Rect rect = new Rect(_startPos, _frameSize);
+            CollectorBotAI[] allBots = FindObjectsByType<CollectorBotAI>(FindObjectsSortMode.None);
 
             for (int i = 0; i < allBots.Length; i++)
             {

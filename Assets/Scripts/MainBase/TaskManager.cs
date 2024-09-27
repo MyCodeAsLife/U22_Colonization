@@ -12,8 +12,8 @@ public class TaskManager : MonoBehaviour
 
     private List<Task> _taskPool = new();
     private List<IResource> _resourcePool = new();
-    private List<CollectorBotAI> _poolOfIdleCollectorBots = new();                // Создать главный пулл, и при старте этот пулл синхронизировать с главным
-    private List<CollectorBotAI> _poolOfWorkingCollectorBots = new();             // При передачи ботов, удалять их отсюда и из главного
+    private List<CollectorBotAI> _poolOfIdleCollectorBots = new();
+    private List<CollectorBotAI> _poolOfWorkingCollectorBots = new();
 
     private void OnDisable()
     {
@@ -24,16 +24,11 @@ public class TaskManager : MonoBehaviour
         }
     }
 
-    private void Start()
+    private void Awake()
     {
         _mainBase = GetComponent<MainBaseAI>();
         _store = _mainBase.Store;
     }
-
-    //public void SetStore(IStore store)                              // ----------------------------Здесь ошибка----------
-    //{
-    //    _store = store;
-    //}
 
     public void AddResourceScaner(ResourceScaner resourceScaner)
     {
@@ -43,10 +38,10 @@ public class TaskManager : MonoBehaviour
 
     public void AddCollectorBot(CollectorBotAI collectorBot)
     {
+        collectorBot.SetBaseAffiliation(_mainBase);
         collectorBot.TaskCompleted += OnTaskCompleted;
         collectorBot.transform.position = transform.position;
         collectorBot.transform.SetParent(transform.parent);
-        collectorBot.SetBaseAffiliation(_mainBase);
         _poolOfIdleCollectorBots.Add(collectorBot);
     }
 
@@ -82,7 +77,7 @@ public class TaskManager : MonoBehaviour
         }
     }
 
-    private void WaitingForConditionsForConstruction(int number)            // Перенести в CheckingForConditionsForConstruction ??
+    private void WaitingForConditionsForConstruction(int number)
     {
         if (CheckingForConditionsForConstruction())
         {
@@ -117,7 +112,9 @@ public class TaskManager : MonoBehaviour
     private void OnTaskCompleted(CollectorBotAI bot)
     {
         _poolOfWorkingCollectorBots.Remove(bot);
-        _poolOfIdleCollectorBots.Add(bot);
+
+        if (_poolOfIdleCollectorBots.Contains(bot) == false)
+            _poolOfIdleCollectorBots.Add(bot);
     }
 
     private Task GetHarvestTask()
@@ -137,7 +134,6 @@ public class TaskManager : MonoBehaviour
     private void AddTask(Task newTask)
     {
         bool taskIsAdded = false;
-        //newTask.Completed += OnTaskCompleted;
 
         if (_taskPool.Count < 1)
         {
@@ -159,30 +155,13 @@ public class TaskManager : MonoBehaviour
             _taskPool.Add(newTask);
     }
 
-    //private Task GetTask()          // Переместить в DistributeTasks ???
-    //{
-    //    Task task = null;
-
-    //    if (_taskPool.Count != 0)
-    //    {
-    //        task = _taskPool[0];
-    //        _taskPool.RemoveAt(0);
-    //    }
-    //    else
-    //    {
-    //        task = GetHarvestTask();
-    //    }
-
-    //    return task;
-    //}
-
-    private void DistributeTasks()   // Проверить наличие задач в пуле и свободных ботов, если задач нет то сформировать задачу на сбор и выдать боту
+    private void DistributeTasks()
     {
         bool isWork = true;
 
         while (isWork)
         {
-            if (_poolOfIdleCollectorBots.Count < 1 || (_taskPool.Count < 1 && _resourcePool.Count < 1))
+            if (_poolOfIdleCollectorBots.Count < 1)
                 break;
 
             Task task = null;
@@ -195,24 +174,21 @@ public class TaskManager : MonoBehaviour
             else
             {
                 task = GetHarvestTask();
+
+                if (task == null)
+                    break;
             }
 
-            //Debug.Log(_poolOfIdleCollectorBots.Count);                  //++++++++++++++++++++++++
-            //Debug.Log(task == null);                                  //++++++++++++++++++++++++
+            _poolOfIdleCollectorBots[0].SetTask(task);
 
-            if (task != null)
+            if (task.TypeOfTask == TypesOfTasks.Constructing)
             {
-                _poolOfIdleCollectorBots[0].SetTask(task);
-                // Если задача на строительство базы, то передать ей свободного бота
-                if (task.TypeOfTask == TypesOfTasks.Constructing)
-                {
-                    _mainBase.TransferCollectorBot(task.Target as BuildingUnderConstruction, _poolOfIdleCollectorBots[0]);
-                }
-                else
-                {
-                    _poolOfWorkingCollectorBots.Add(_poolOfIdleCollectorBots[0]);
-                    _poolOfIdleCollectorBots.RemoveAt(0);
-                }
+                _mainBase.TransferCollectorBot(task.Target as BuildingUnderConstruction, _poolOfIdleCollectorBots[0]);
+            }
+            else
+            {
+                _poolOfWorkingCollectorBots.Add(_poolOfIdleCollectorBots[0]);
+                _poolOfIdleCollectorBots.RemoveAt(0);
             }
         }
     }

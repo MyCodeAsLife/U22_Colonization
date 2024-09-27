@@ -10,5 +10,4 @@ public interface IStore
 
     public void StoreResource(ResourceType resourceType);
     public void SubtractResources(AmountOfResources amount);
-    //public AmountOfResources GetAmountOfResources();
 }

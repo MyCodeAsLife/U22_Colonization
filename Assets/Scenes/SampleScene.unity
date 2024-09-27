@@ -2648,7 +2648,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _map: {fileID: 390180206}
-  _navMesh: {fileID: 644922770}
 --- !u!1 &1888786576
 GameObject:
   m_ObjectHideFlags: 0
@@ -2873,7 +2872,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b636264a64eeafe4a9328a543b4d3aac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxCountCollectorBots: 3
+  _startCountCollectorBots: 3
 --- !u!1 &2007076558
 GameObject:
   m_ObjectHideFlags: 0

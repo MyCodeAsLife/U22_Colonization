@@ -28,6 +28,8 @@ public class BuildingUnderConstruction : Building
 
     public void SetStartPosition(Vector3 position) => _startPositionY = position.y;
     public void SetEndPosition(Vector3 position) => _endPositionY = position.y;
+    public void SetRoundPosition(Vector2Int roundPos) => RoundPosition = roundPos;
+    public void SetTransferBot(CollectorBotAI bot) => _transferBot = bot;
 
     public void StartConstruction(ChangingObject builder)
     {
@@ -41,26 +43,15 @@ public class BuildingUnderConstruction : Building
         ActionFinish();
     }
 
-    public void SetRoundPosition(Vector2Int roundPos)
-    {
-        RoundPosition = roundPos;
-    }
-
-    public void SetTransferBot(CollectorBotAI bot)
-    {
-        _transferBot = bot;
-    }
-
     public void CompleteConstruction(ChangingObject builder)
     {
-        Building building;                                  // Нужно ли кэширование ??
+        Building building;
         StopConstruction(builder);
 
         switch (_buildingType)
         {
             case BuildingType.MainBase:
                 building = transform.AddComponent<MainBaseAI>();
-                // Передать бота новой базе
                 building.GetComponent<MainBaseAI>().ReceiveCollectorBot(_transferBot);
                 break;
 
@@ -70,8 +61,6 @@ public class BuildingUnderConstruction : Building
         }
 
         ActionFinish();
-        // Вызвать активацию строения если нужно
-
         Destroy(_flag.gameObject);
         Destroy(this);
     }

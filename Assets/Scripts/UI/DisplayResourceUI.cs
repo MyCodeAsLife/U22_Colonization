@@ -57,13 +57,6 @@ public class DisplayResourceUI : MonoBehaviour                          // Устар
         //UnbindEvents();
     }
 
-    //private void Start()
-    //{
-    //    OnChangeNumberOfFood(0);
-    //    OnChangeNumberOfTimber(0);
-    //    OnChangeNumberOfMarble(0);
-    //}
-
     private void OnChangeNumberOfFood(int number) => _displayNumberOfFood.text = "Food: " + number.ToString();
     private void OnChangeNumberOfTimber(int number) => _displayNumberOfTimber.text = "Timber: " + number.ToString();
     private void OnChangeNumberOfMarble(int number) => _displayNumberOfMarble.text = "Marble: " + number.ToString();

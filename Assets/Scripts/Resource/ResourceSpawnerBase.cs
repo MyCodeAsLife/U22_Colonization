@@ -31,13 +31,12 @@ public class ResourceSpawnerBase
         _pool.ReturnAll();
     }
 
-    public void Spawn(Vector3 spawnPosition, int id)            // Переименовать?
+    public void Spawn(Vector3 spawnPosition, int id)
     {
         var resource = _pool.Get();
         resource.SetID(id);
         resource.transform.position = spawnPosition;
         resource.gameObject.SetActive(true);
-        //return resource;
     }
 
     private Resource Create(Resource prefab)

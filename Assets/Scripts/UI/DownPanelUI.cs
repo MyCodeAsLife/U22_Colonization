@@ -7,23 +7,20 @@ public class DownPanelUI : MonoBehaviour
     [SerializeField] private TMP_Text _displayNumberOfFood;
     [SerializeField] private TMP_Text _displayNumberOfTimber;
     [SerializeField] private TMP_Text _displayNumberOfMarble;
-    //private Image _imagePanel;                                                          // В этом нет смысла
+
     private Vector3 _showPosition;
     private Vector3 _hidePosition;
     private Coroutine _swimming;
     private BuildingPlacer _buildingPlacer;
     private GameObject _buildingPlacerPrefab;
-    //private IList<OrderButton> _orderButtons;
     private OrderButton[] _orderButtons;
-
-    //private MainBaseAI _selectBuilding;
     private SelectableObject _selectedObject;
 
     public TMP_Text DisplayNumberOfFood => _displayNumberOfFood;
     public TMP_Text DisplayNumberOfTimber => _displayNumberOfTimber;
     public TMP_Text DisplayNumberOfMarble => _displayNumberOfMarble;
 
-    private void Awake()                                // +++++++++
+    private void Awake()
     {
         _orderButtons = GetComponentsInChildren<OrderButton>();
     }
@@ -32,25 +29,16 @@ public class DownPanelUI : MonoBehaviour
     {
         _showPosition = Vector3.zero;
         _hidePosition = new Vector3(0, -150f, 0);
-        //_imagePanel = GetComponent<Image>();
-        //_imagePanel.rectTransform.anchoredPosition = new Vector3(0, -150f, 0);
-        transform.position = _hidePosition;                                      // Magic
-        //StartCoroutine(SwimmingPanel(_showPosition));                                                                 // +++++++++++++
-        //OnChangeNumberOfFood(0);
-        //OnChangeNumberOfTimber(0);
-        //OnChangeNumberOfMarble(0);
+        transform.position = _hidePosition;
     }
 
     public void LinkBase(MainBaseAI mainBase)
     {
         _selectedObject = mainBase;
-        //_selectBuilding = mainBase;
         ChangeResourcesNumber(mainBase);
         mainBase.Store.FoodQuantityChanged += OnChangeNumberOfFood;
         mainBase.Store.TimberQuantityChanged += OnChangeNumberOfTimber;
         mainBase.Store.MarbleQuantityChanged += OnChangeNumberOfMarble;
-
-        //Debug.Log("LinkBase");                                                                  // +++++++++++++
 
         for (int i = 0; i < _orderButtons.Length; i++)
             _orderButtons[i].SetCustomer(mainBase);
@@ -64,7 +52,6 @@ public class DownPanelUI : MonoBehaviour
         mainBase.Store.FoodQuantityChanged -= OnChangeNumberOfFood;
         mainBase.Store.TimberQuantityChanged -= OnChangeNumberOfTimber;
         mainBase.Store.MarbleQuantityChanged -= OnChangeNumberOfMarble;
-        //_selectBuilding = null;
         _selectedObject = null;
     }
 
@@ -106,15 +93,12 @@ public class DownPanelUI : MonoBehaviour
         {
             yield return delay;
 
-            transform.position = Vector3.Lerp(transform.position, targetPosition, speed);                                 // Рабочий вариант
+            transform.position = Vector3.Lerp(transform.position, targetPosition, speed);
             float distance = Vector3.Distance(transform.position, targetPosition);
-            //_imagePanel.rectTransform.anchoredPosition = Vector3.Lerp(transform.position, Vector3.zero, speed);       // Рабочий вариант
-            //float distance = Vector3.Distance(_imagePanel.rectTransform.anchoredPosition, Vector3.zero);
 
             if (distance < 0.1f)
             {
                 transform.position = targetPosition;
-                //_imagePanel.rectTransform.anchoredPosition = Vector3.zero;
                 isWork = false;
             }
         }

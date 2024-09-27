@@ -1,4 +1,4 @@
-public enum BuildingType            // ”празднить?
+public enum BuildingType
 {
     MainBase,
     Barack,

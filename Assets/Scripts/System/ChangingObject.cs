@@ -27,8 +27,6 @@ public class ChangingObject : SelectableObject
 
     protected virtual void StopAction()
     {
-        Debug.Log("Stop Action");
-
         if (CurrentAction != null)
             StopCoroutine(CurrentAction);
 
@@ -42,8 +40,8 @@ public class ChangingObject : SelectableObject
 
     protected virtual void ActionFinish()
     {
-        ActionFinished?.Invoke();
         CurrentAction = null;
+        ActionFinished?.Invoke();
     }
 
     protected IEnumerator PerformingAnAction(Action action)

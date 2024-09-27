@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class CollectorBotAI : ChangingObject
 {
-    //private Task _task;
     private BotMover _mover;
     private MainBaseAI _mainBase;
     private bool _haveCollectedResource;
@@ -45,36 +44,32 @@ public class CollectorBotAI : ChangingObject
         _resourceAttachmentPoint = new Vector3(0, transform.localScale.y + 1, 0);
     }
 
-    private void OnTriggerEnter(Collider other)                 // Переделать под сравнения на тип текущей задачи
+    private void OnTriggerEnter(Collider other)
     {
-        if (CurrentTask != null && other.gameObject.layer == _interactableObjectMask)                                  // Приделать состояние задач, и в зависимости от задачи к Action подключать нужную функцию
+        if (CurrentTask != null && other.gameObject.layer == _interactableObjectMask)
         {
             var obj = other.GetComponent<SelectableObject>();
 
-            if (/*obj is IResource*/CurrentTask.TypeOfTask == TypesOfTasks.Harvesting && _haveCollectedResource == false && obj is IResource /*&& _task != null*/)              // Если задание на сбор
+            if (CurrentTask.TypeOfTask == TypesOfTasks.Harvesting && _haveCollectedResource == false && obj is IResource)
             {
                 if ((CurrentTask.Target as IResource).GetId() == (obj as IResource).GetId())
                 {
                     _mover.Stop();
-                    StopAction();                                                               // Добавил для проверки на null
-                    CurrentAction = StartCoroutine(PerformingAnAction(Collecting));                 // А Если CurrentAction не null ????
+                    CurrentAction = StartCoroutine(PerformingAnAction(Collecting));
                 }
             }
-            else if (_haveCollectedResource && obj is MainBaseAI && obj as MainBaseAI == _mainBase)                                   // Если задание на перенос
+            else if (_haveCollectedResource && obj is MainBaseAI && obj as MainBaseAI == _mainBase)
             {
                 _mover.Stop();
                 StoreResource(CurrentTask.Target as IResource);
                 OnMoveCompleted();
             }
-            else if (CurrentTask.TypeOfTask == TypesOfTasks.Constructing && obj is BuildingUnderConstruction)       // Если задание на строительство
+            else if (CurrentTask.TypeOfTask == TypesOfTasks.Constructing && obj is BuildingUnderConstruction)
             {
                 var building = obj as BuildingUnderConstruction;
                 _mover.Stop();
-                StopAction();                                                               // Добавил для проверки на null
-                CurrentAction = StartCoroutine(PerformingAnAction(Constructing));                 // А Если CurrentAction не null ????
-                //ActionProgress.Value = building.GetActionProgress();
+                CurrentAction = StartCoroutine(PerformingAnAction(Constructing));
                 building.StartConstruction(this);
-                //Debug.Log(building.GetActionProgress());                                            //+++++++++++++++++++++++++
             }
         }
     }
@@ -108,21 +103,14 @@ public class CollectorBotAI : ChangingObject
     {
         base.StopAction();
 
-        if (CurrentTask.TypeOfTask == TypesOfTasks.Constructing)          // Добавить ActionFinish в StopConstruction ??
+        if (CurrentTask.TypeOfTask == TypesOfTasks.Constructing)
             (CurrentTask.Target as BuildingUnderConstruction).StopConstruction(this);
     }
 
     protected void CompleteTask()
     {
-        //_task.Complete();
         TaskCompleted?.Invoke(this);
         CurrentTask = null;
-    }
-
-    private void OnTaskCompleted(Task task)
-    {
-        CurrentTask = null;
-        //OnMoveCompleted();
     }
 
     private void StoreResource(IResource resource)

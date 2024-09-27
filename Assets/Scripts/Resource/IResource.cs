@@ -1,6 +1,6 @@
 using System;
 
-public interface IResource                          // ”празднить ???
+public interface IResource
 {
     public bool IsOccupied { get; }
 

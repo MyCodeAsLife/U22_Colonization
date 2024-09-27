@@ -6,15 +6,14 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerControlSystem))]
 public class BuildingPlacer : MonoBehaviour
 {
-    private SingleReactiveProperty<float> _cellSize = new();
-    private PlayerControlSystem _controlSysytem;
-    //[SerializeField] private BuildingUnderConstruction _planedBuilding;                                   // ++++++++++++
-    private BuildingUnderConstruction _flyingBuilding;
     private Dictionary<Vector2Int, Building> _buildingsPositions = new();
-    private MainBaseAI _selectedInteractiveObject;                              // Если делать разные типы объектов у которых будут кнопки, то здесь нужен универсальный
+    private SingleReactiveProperty<float> _cellSize = new();
+    private BuildingUnderConstruction _flyingBuilding;
+    private MainBaseAI _selectedInteractiveObject;
+    private PlayerControlSystem _controlSysytem;
+    private bool _canBePlaced;
     private int _roundPosX;
     private int _roundPosZ;
-    private bool _canBePlaced;
 
     public float CellSize { get { return _cellSize.Value; } }
 
@@ -29,31 +28,15 @@ public class BuildingPlacer : MonoBehaviour
         _controlSysytem = GetComponent<PlayerControlSystem>();
     }
 
-    public void SubscribeOnCellSizeChanged(Action<float> fun)
-    {
-        _cellSize.Change += fun;
-    }
-
-    public void UnSubscribeOnCellSizeChanged(Action<float> fun)
-    {
-        _cellSize.Change -= fun;
-    }
-
-    public void SelectInteractivObject(MainBaseAI interactiveObject)
-    {
-        _selectedInteractiveObject = interactiveObject;
-    }
-
-    public void UnSelectInteractivObject()
-    {
-        _selectedInteractiveObject = null;
-    }
+    public void SelectInteractivObject(MainBaseAI interactiveObject) => _selectedInteractiveObject = interactiveObject;
+    public void UnSelectInteractivObject() => _selectedInteractiveObject = null;
+    public void SubscribeOnCellSizeChanged(Action<float> fun) => _cellSize.Change += fun;
+    public void UnSubscribeOnCellSizeChanged(Action<float> fun) => _cellSize.Change -= fun;
 
     public void CreateFlyingBuilding(BuildingUnderConstruction prefab)
     {
         var parent = GameObject.FindGameObjectWithTag("ResourceSpawner").transform.parent;      //Magic string
-        _flyingBuilding = Instantiate(prefab, parent);                                          // В качестве родителя делать MainCanvas
-        //MoveBuilding();
+        _flyingBuilding = Instantiate(prefab, parent);
         _controlSysytem.InputActions.Mouse.Delta.started += OnMouseMove;
         _controlSysytem.InputActions.Mouse.LeftButtonClick.performed += OnMouseLeftButtonClick;
     }
@@ -72,8 +55,6 @@ public class BuildingPlacer : MonoBehaviour
             _flyingBuilding.SetStartPosition(_flyingBuilding.transform.position);
             _flyingBuilding.SetRoundPosition(new Vector2Int(_roundPosX, _roundPosZ));
             _flyingBuilding.BuildingStarted += OnStartBuilding;
-            //_flyingBuilding.gameObject.SetActive(false);
-            //_selectedInteractiveObject.ScheduleConstruction(_flyingBuilding);
             _selectedInteractiveObject.TaskManager.ScheduleConstruction(_flyingBuilding);
             _flyingBuilding = null;
         }

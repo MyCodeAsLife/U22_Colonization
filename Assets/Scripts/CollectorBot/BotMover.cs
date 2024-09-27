@@ -3,13 +3,11 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
-// Сделать атодобавления NavMeshAgent компоненнта вместе с этим компонентом //??????????????????????
 public class BotMover : MonoBehaviour
 {
     private NavMeshAgent _agent;
     private Coroutine _moving;
     private Vector3 _targetPoint;
-    //private bool _isWork;
     private float _moveSpeed;
 
     public event Action MoveCompleted;
@@ -28,8 +26,7 @@ public class BotMover : MonoBehaviour
 
     private void Start()
     {
-        //_agent = GetComponent<NavMeshAgent>();
-        _moveSpeed = 7f;                                            // Нужен ли тогда ???
+        _moveSpeed = 7f;
         _agent.speed = _moveSpeed;
     }
 
@@ -57,14 +54,10 @@ public class BotMover : MonoBehaviour
         bool isWork = true;
         _targetPoint.y = 0;
 
-        while (isWork)                     // Переделать на  _agent.isStopped ???
+        while (isWork)
         {
             yield return null;
-            //transform.LookAt(_targetPoint);
-            //transform.position = Vector3.MoveTowards(transform.position, _targetPoint, _moveSpeed * Time.deltaTime);
-
             _agent.destination = _targetPoint;
-            //_agent.Move(_targetPoint);
 
             if (Vector3.Distance(transform.position, _targetPoint) < 0.1f)
                 isWork = false;

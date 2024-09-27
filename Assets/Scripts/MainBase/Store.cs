@@ -2,7 +2,7 @@ using System;
 
 public class Store : IStore
 {
-    private AmountOfResources _amountOfResources = new();               // Убрать данный класс и сделать на обычных int?
+    private AmountOfResources _amountOfResources = new();
 
     public AmountOfResources AmountOfResources { get { return _amountOfResources; } }
 
@@ -35,7 +35,7 @@ public class Store : IStore
         }
     }
 
-    public void SubtractResources(AmountOfResources amount)                 // Перенести в Store?
+    public void SubtractResources(AmountOfResources amount)
     {
         ReduceFood(amount.Food);
         ReduceTimber(amount.Timber);
@@ -95,9 +95,4 @@ public class Store : IStore
             MarbleQuantityChanged?.Invoke(_amountOfResources.Marble);
         }
     }
-
-    //AmountOfResources IStore.GetAmountOfResources()
-    //{
-    //    return _amountOfResources;
-    //}
 }

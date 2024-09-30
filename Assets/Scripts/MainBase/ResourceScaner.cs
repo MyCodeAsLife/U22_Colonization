@@ -9,7 +9,8 @@ public class ResourceScaner
     public ResourceScaner(Transform map)
     {
         const float PlaneScale = 10;
-        _selectMask = LayerMask.NameToLayer("Interactable");
+        const string InteractiveLayerName = "Interactable";
+        _selectMask = LayerMask.NameToLayer(InteractiveLayerName);
         _scanningArea = new Vector3(map.localScale.x * PlaneScale, map.localScale.y * PlaneScale, map.localScale.z * PlaneScale);
     }
 

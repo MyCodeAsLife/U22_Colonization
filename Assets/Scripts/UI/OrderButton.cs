@@ -4,9 +4,9 @@ public class OrderButton : MonoBehaviour
 {
     [SerializeField] protected Price objectPrice;
 
-    protected MainBaseAI _currentBuilding;
+    protected MainBase _currentBuilding;
 
-    public void SetCustomer(MainBaseAI building)
+    public void SetCustomer(MainBase building)
     {
         _currentBuilding = building;
     }

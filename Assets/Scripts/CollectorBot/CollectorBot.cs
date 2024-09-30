@@ -2,23 +2,24 @@ using System;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class CollectorBotAI : ChangingObject
+public class CollectorBot : ChangingObject
 {
     private BotMover _mover;
-    private MainBaseAI _mainBase;
+    private MainBase _mainBase;
     private bool _haveCollectedResource;
     private int _interactableObjectMask;
     private Vector3 _resourceAttachmentPoint;
 
     public Task CurrentTask { get; private set; }
 
-    public event Action<CollectorBotAI> TaskCompleted;
+    public event Action<CollectorBot> TaskCompleted;
 
     protected override void Awake()
     {
         base.Awake();
+        const string InteractiveLayerName = "Interactable";
         _mover = transform.AddComponent<BotMover>();
-        _interactableObjectMask = LayerMask.NameToLayer("Interactable");
+        _interactableObjectMask = LayerMask.NameToLayer(InteractiveLayerName);
     }
 
     private void OnEnable()
@@ -40,8 +41,9 @@ public class CollectorBotAI : ChangingObject
 
     private void Start()
     {
+        const float BotHeight = 1f;
         DurationOfAction = 5f;
-        _resourceAttachmentPoint = new Vector3(0, transform.localScale.y + 1, 0);
+        _resourceAttachmentPoint = new Vector3(0, transform.localScale.y + BotHeight, 0);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -50,7 +52,7 @@ public class CollectorBotAI : ChangingObject
         {
             var obj = other.GetComponent<SelectableObject>();
 
-            if (CurrentTask.TypeOfTask == TypesOfTasks.Harvesting && _haveCollectedResource == false && obj is IResource)
+            if (CurrentTask.TypeOfTask == TypeOfTask.Harvesting && _haveCollectedResource == false && obj is IResource)
             {
                 if ((CurrentTask.Target as IResource).GetId() == (obj as IResource).GetId())
                 {
@@ -58,13 +60,13 @@ public class CollectorBotAI : ChangingObject
                     CurrentAction = StartCoroutine(PerformingAnAction(Collecting));
                 }
             }
-            else if (_haveCollectedResource && obj is MainBaseAI && obj as MainBaseAI == _mainBase)
+            else if (_haveCollectedResource && obj is MainBase && obj as MainBase == _mainBase)
             {
                 _mover.Stop();
                 StoreResource(CurrentTask.Target as IResource);
                 OnMoveCompleted();
             }
-            else if (CurrentTask.TypeOfTask == TypesOfTasks.Constructing && obj is BuildingUnderConstruction)
+            else if (CurrentTask.TypeOfTask == TypeOfTask.Constructing && obj is BuildingUnderConstruction)
             {
                 var building = obj as BuildingUnderConstruction;
                 _mover.Stop();
@@ -94,7 +96,7 @@ public class CollectorBotAI : ChangingObject
         GoTo(task.Target.transform.position);
     }
 
-    public void SetBaseAffiliation(MainBaseAI mainBase)
+    public void SetBaseAffiliation(MainBase mainBase)
     {
         _mainBase = mainBase;
     }
@@ -103,7 +105,7 @@ public class CollectorBotAI : ChangingObject
     {
         base.StopAction();
 
-        if (CurrentTask.TypeOfTask == TypesOfTasks.Constructing)
+        if (CurrentTask.TypeOfTask == TypeOfTask.Constructing)
             (CurrentTask.Target as BuildingUnderConstruction).StopConstruction(this);
     }
 

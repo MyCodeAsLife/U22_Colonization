@@ -8,13 +8,14 @@ public class DownPanelUI : MonoBehaviour
     [SerializeField] private TMP_Text _displayNumberOfTimber;
     [SerializeField] private TMP_Text _displayNumberOfMarble;
 
+    private GameObject _buildingPlacerPrefab;
+    private SelectableObject _selectedObject;
+    private BuildingPlacer _buildingPlacer;
+    private OrderButton[] _orderButtons;
     private Vector3 _showPosition;
     private Vector3 _hidePosition;
+    private float _swimmingSpeed;
     private Coroutine _swimming;
-    private BuildingPlacer _buildingPlacer;
-    private GameObject _buildingPlacerPrefab;
-    private OrderButton[] _orderButtons;
-    private SelectableObject _selectedObject;
 
     public TMP_Text DisplayNumberOfFood => _displayNumberOfFood;
     public TMP_Text DisplayNumberOfTimber => _displayNumberOfTimber;
@@ -27,12 +28,13 @@ public class DownPanelUI : MonoBehaviour
 
     private void Start()
     {
+        _swimmingSpeed = 0.1f;
         _showPosition = Vector3.zero;
         _hidePosition = new Vector3(0, -150f, 0);
         transform.position = _hidePosition;
     }
 
-    public void LinkBase(MainBaseAI mainBase)
+    public void LinkBase(MainBase mainBase)
     {
         _selectedObject = mainBase;
         ChangeResourcesNumber(mainBase);
@@ -46,7 +48,7 @@ public class DownPanelUI : MonoBehaviour
         ShowPanel();
     }
 
-    public void UnLinkBase(MainBaseAI mainBase)
+    public void UnLinkBase(MainBase mainBase)
     {
         HidePanel();
         mainBase.Store.FoodQuantityChanged -= OnChangeNumberOfFood;
@@ -66,6 +68,7 @@ public class DownPanelUI : MonoBehaviour
 
         _swimming = StartCoroutine(SwimmingPanel(_showPosition));
     }
+
     private void HidePanel()
     {
         if (_swimming != null)
@@ -74,7 +77,7 @@ public class DownPanelUI : MonoBehaviour
         _swimming = StartCoroutine(SwimmingPanel(_hidePosition));
     }
 
-    private void ChangeResourcesNumber(MainBaseAI mainBase)
+    private void ChangeResourcesNumber(MainBase mainBase)
     {
         AmountOfResources amountOfResources = mainBase.Store.AmountOfResources;
 
@@ -85,18 +88,16 @@ public class DownPanelUI : MonoBehaviour
 
     private IEnumerator SwimmingPanel(Vector3 targetPosition)
     {
-        float speed = 0.1f;                                                       //+++++++++++
+        const float PermissibleFault = 0.1f;
         var delay = new WaitForFixedUpdate();
         bool isWork = true;
 
         while (isWork)
         {
             yield return delay;
+            transform.position = Vector3.Lerp(transform.position, targetPosition, _swimmingSpeed);
 
-            transform.position = Vector3.Lerp(transform.position, targetPosition, speed);
-            float distance = Vector3.Distance(transform.position, targetPosition);
-
-            if (distance < 0.1f)
+            if (Vector3Extensions.IsEnoughClose(transform.position, targetPosition, PermissibleFault))
             {
                 transform.position = targetPosition;
                 isWork = false;

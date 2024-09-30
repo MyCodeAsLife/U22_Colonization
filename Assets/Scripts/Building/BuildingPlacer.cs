@@ -6,10 +6,12 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerControlSystem))]
 public class BuildingPlacer : MonoBehaviour
 {
-    private Dictionary<Vector2Int, Building> _buildingsPositions = new();
+    private const string ResourceSpawnerTag = "ResourceSpawner";
+
+    private Dictionary<Vector3Int, Building> _buildingsPositions = new();
     private SingleReactiveProperty<float> _cellSize = new();
     private BuildingUnderConstruction _flyingBuilding;
-    private MainBaseAI _selectedInteractiveObject;
+    private MainBase _selectedInteractiveObject;
     private PlayerControlSystem _controlSysytem;
     private bool _canBePlaced;
     private int _roundPosX;
@@ -28,14 +30,14 @@ public class BuildingPlacer : MonoBehaviour
         _controlSysytem = GetComponent<PlayerControlSystem>();
     }
 
-    public void SelectInteractivObject(MainBaseAI interactiveObject) => _selectedInteractiveObject = interactiveObject;
-    public void UnSelectInteractivObject() => _selectedInteractiveObject = null;
+    public void SelectInteractiveObject(MainBase interactiveObject) => _selectedInteractiveObject = interactiveObject;
+    public void UnSelectInteractiveObject() => _selectedInteractiveObject = null;
     public void SubscribeOnCellSizeChanged(Action<float> fun) => _cellSize.Change += fun;
     public void UnSubscribeOnCellSizeChanged(Action<float> fun) => _cellSize.Change -= fun;
 
     public void CreateFlyingBuilding(BuildingUnderConstruction prefab)
     {
-        var parent = GameObject.FindGameObjectWithTag("ResourceSpawner").transform.parent;      //Magic string
+        var parent = GameObject.FindGameObjectWithTag(ResourceSpawnerTag).transform.parent;
         _flyingBuilding = Instantiate(prefab, parent);
         _controlSysytem.InputActions.Mouse.Delta.started += OnMouseMove;
         _controlSysytem.InputActions.Mouse.LeftButtonClick.performed += OnMouseLeftButtonClick;
@@ -43,17 +45,18 @@ public class BuildingPlacer : MonoBehaviour
 
     private void OnMouseLeftButtonClick(InputAction.CallbackContext context)
     {
-
         if (_flyingBuilding != null && _canBePlaced)
         {
+            const float StartDepth = 2f;
+
             _controlSysytem.InputActions.Mouse.Delta.started -= OnMouseMove;
             _controlSysytem.InputActions.Mouse.LeftButtonClick.performed -= OnMouseLeftButtonClick;
 
-            float newPosY = _flyingBuilding.transform.position.y - _flyingBuilding.transform.localScale.y * 2;        // Magic
+            float newPosY = _flyingBuilding.transform.position.y - _flyingBuilding.transform.localScale.y * StartDepth;
             _flyingBuilding.SetEndPosition(_flyingBuilding.transform.position);
             _flyingBuilding.transform.position = new Vector3(_flyingBuilding.transform.position.x, newPosY, _flyingBuilding.transform.position.z);
             _flyingBuilding.SetStartPosition(_flyingBuilding.transform.position);
-            _flyingBuilding.SetRoundPosition(new Vector2Int(_roundPosX, _roundPosZ));
+            _flyingBuilding.SetRoundPosition(new Vector3Int(_roundPosX, 0, _roundPosZ));
             _flyingBuilding.BuildingStarted += OnStartBuilding;
             _selectedInteractiveObject.TaskManager.ScheduleConstruction(_flyingBuilding);
             _flyingBuilding = null;
@@ -62,7 +65,7 @@ public class BuildingPlacer : MonoBehaviour
 
     private void OnStartBuilding(BuildingUnderConstruction building)
     {
-        RecordLocationBuilding(new Vector2Int(building.RoundPosition.x, building.RoundPosition.y), building);
+        RecordLocationBuilding(new Vector3Int(building.RoundPosition.x, 0, building.RoundPosition.z), building);
         building.BuildingStarted -= OnStartBuilding;
     }
 
@@ -77,48 +80,42 @@ public class BuildingPlacer : MonoBehaviour
     private void OnMouseMove(InputAction.CallbackContext context)
     {
         MoveBuilding();
-        bool chaeckAllowPosition = CheckAllowPosition(new Vector2Int(_roundPosX, _roundPosZ), _flyingBuilding);
+        bool chaeckAllowPosition = CheckAllowPosition(_flyingBuilding);
 
         if (_canBePlaced != chaeckAllowPosition)
         {
             _canBePlaced = chaeckAllowPosition;
 
             if (_canBePlaced)
-            {
                 _flyingBuilding.DisplayValidPosition();
-            }
             else
-            {
                 _flyingBuilding.DisplayInvalidPosition();
-            }
         }
     }
 
-    private void RecordLocationBuilding(Vector2Int position, Building building)     // Нужно ли передавать данные в функцию
+    private void RecordLocationBuilding(Vector3Int position, Building building)
     {
-        int posX = position.x - (int)(building.Size.x * 0.5f);                          // Дублирование
-        int posZ = position.y - (int)(building.Size.z * 0.5f);                          // Дублирование
+        var centerPosition = CalculateCenterPosition(position, building);
 
         for (int x = 0; x < building.Size.x; x++)
         {
             for (int z = 0; z < building.Size.z; z++)
             {
-                Vector2Int cellPosition = new Vector2Int(posX + x, posZ + z);                          // Дублирование?
+                Vector3Int cellPosition = new Vector3Int(centerPosition.x + x, 0, centerPosition.z + z);
                 _buildingsPositions.Add(cellPosition, _flyingBuilding);
             }
         }
     }
 
-    private bool CheckAllowPosition(Vector2Int position, Building building)     // Нужно ли передавать данные в функцию
+    private bool CheckAllowPosition(Building building)
     {
-        int posX = position.x - (int)(building.Size.x * 0.5f);                          // Дублирование
-        int posZ = position.y - (int)(building.Size.z * 0.5f);                          // Дублирование
+        var centerPosition = CalculateCenterPosition(new Vector3Int(_roundPosX, 0, _roundPosZ), building);
 
         for (int x = 0; x < building.Size.x; x++)
         {
             for (int z = 0; z < building.Size.z; z++)
             {
-                Vector2Int cellPosition = new Vector2Int(posX + x, posZ + z);                          // Дублирование?
+                Vector3Int cellPosition = new Vector3Int(centerPosition.x + x, 0, centerPosition.z + z);
 
                 if (_buildingsPositions.ContainsKey(cellPosition))
                     return false;
@@ -126,5 +123,13 @@ public class BuildingPlacer : MonoBehaviour
         }
 
         return true;
+    }
+
+    private Vector3Int CalculateCenterPosition(Vector3Int position, Building building)
+    {
+        int posX = position.x - (int)(building.Size.x * 0.5f);
+        int posZ = position.z - (int)(building.Size.z * 0.5f);
+
+        return new Vector3Int(posX, 0, posZ);
     }
 }

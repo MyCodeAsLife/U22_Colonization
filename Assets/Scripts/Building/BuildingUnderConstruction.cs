@@ -5,31 +5,34 @@ using UnityEngine;
 public class BuildingUnderConstruction : Building
 {
     [SerializeField] private BuildingType _buildingType;
-    private CollectorBotAI _transferBot;
+
+    private CollectorBot _transferBot;
     private Flag _flag;
     private float _startPositionY;
     private float _endPositionY;
 
     public bool IsBuildingInProgress { get; private set; }
-    public Vector2Int RoundPosition { get; private set; }
+    public Vector3Int RoundPosition { get; private set; }
 
     public event Action<BuildingUnderConstruction> BuildingStarted;
 
     protected override void Start()
     {
+        const float Height = 4f;
+        const float Scale = 0.05f;
         base.Start();
         _flag = GetComponentInChildren<Flag>();
         DurationOfAction = 5f;
-        Vector3 progressBarPosition = new Vector3(0, 4, 0);                         //Magic ??
-        Vector3 progressBarScale = new Vector3(0.05f, 0.05f, 0.05f);                //Magic ??
+        Vector3 progressBarPosition = new Vector3(0, Height, 0);
+        Vector3 progressBarScale = new Vector3(Scale, Scale, Scale);
         ActionProgressViewer.SetProgressBarPosition(progressBarPosition);
         ActionProgressViewer.SetProgressBarScale(progressBarScale);
     }
 
     public void SetStartPosition(Vector3 position) => _startPositionY = position.y;
     public void SetEndPosition(Vector3 position) => _endPositionY = position.y;
-    public void SetRoundPosition(Vector2Int roundPos) => RoundPosition = roundPos;
-    public void SetTransferBot(CollectorBotAI bot) => _transferBot = bot;
+    public void SetRoundPosition(Vector3Int roundPos) => RoundPosition = roundPos;
+    public void SetTransferBot(CollectorBot bot) => _transferBot = bot;
 
     public void StartConstruction(ChangingObject builder)
     {
@@ -51,8 +54,8 @@ public class BuildingUnderConstruction : Building
         switch (_buildingType)
         {
             case BuildingType.MainBase:
-                building = transform.AddComponent<MainBaseAI>();
-                building.GetComponent<MainBaseAI>().ReceiveCollectorBot(_transferBot);
+                building = transform.AddComponent<MainBase>();
+                building.GetComponent<MainBase>().ReceiveCollectorBot(_transferBot);
                 break;
 
             case BuildingType.Barack:

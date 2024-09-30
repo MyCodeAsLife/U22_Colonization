@@ -11,23 +11,25 @@ public class PlayerControlSystem : MonoBehaviour
 {
     [SerializeField] private Image _frameImage;
 
-    private int _selectionMask;
-    private int _groundMask;
-    private int _uiMask;
-    private Ray _ray;
-    private Plane _plane;
-    private RaycastHit _hit = new();
     private PlayerControlStates _states = new();
+    private RaycastHit _hit = new();
+    private Plane _plane;
+    private Ray _ray;
+
     private List<SelectableObject> _listOfSelected = new();
     private MainInputActions _inputActions;
     private BuildingPlacer _buildingPlacer;
     private Coroutine _frameStretching;
     private SelectableObject _hovered;
     private CameraMover _cameraMover;
+
     private Vector2 _cursoreCurrentPosition;
     private Vector2 _cursoreStartPosition;
     private Vector2 _frameSize;
     private Vector2 _startPos;
+    private int _selectionMask;
+    private int _groundMask;
+    private int _uiMask;
 
     public MainInputActions InputActions { get { return _inputActions; } }
 
@@ -169,7 +171,7 @@ public class PlayerControlSystem : MonoBehaviour
     {
         if (_hit.collider != null && _hit.collider.gameObject.layer == _groundMask)
             for (int i = 0; i < _listOfSelected.Count; i++)
-                if (_listOfSelected[i].TryGetComponent<CollectorBotAI>(out CollectorBotAI bot))
+                if (_listOfSelected[i].TryGetComponent<CollectorBot>(out CollectorBot bot))
                     bot.GoTo(_hit.point);
     }
 
@@ -180,8 +182,8 @@ public class PlayerControlSystem : MonoBehaviour
             _listOfSelected.Add(obj);
             obj.Selected();
 
-            if (obj is MainBaseAI)
-                _buildingPlacer.SelectInteractivObject(obj as MainBaseAI);
+            if (obj is MainBase)
+                _buildingPlacer.SelectInteractiveObject(obj as MainBase);
         }
     }
 
@@ -192,8 +194,8 @@ public class PlayerControlSystem : MonoBehaviour
             obj.UnSelect();
             _listOfSelected.Remove(obj);
 
-            if (obj is MainBaseAI)
-                _buildingPlacer.UnSelectInteractivObject();
+            if (obj is MainBase)
+                _buildingPlacer.UnSelectInteractiveObject();
         }
     }
 
@@ -221,7 +223,7 @@ public class PlayerControlSystem : MonoBehaviour
         {
             yield return delay;
             Rect rect = new Rect(_startPos, _frameSize);
-            CollectorBotAI[] allBots = FindObjectsByType<CollectorBotAI>(FindObjectsSortMode.None);
+            CollectorBot[] allBots = FindObjectsByType<CollectorBot>(FindObjectsSortMode.None);
 
             for (int i = 0; i < allBots.Length; i++)
             {

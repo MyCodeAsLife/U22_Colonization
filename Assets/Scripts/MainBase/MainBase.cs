@@ -4,17 +4,17 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class MainBaseAI : Building
+public class MainBase : Building
 {
-    [SerializeField] private int _startCountCollectorBots;                         // Переименовать
+    [SerializeField] private int _startingNumberOfBots;
 
     private Transform _map;
     private Store _store = new();
     private DownPanelUI _buildingPanelUI;
     private GatheringPoint _gatheringPoint;
-    private CollectorBotAI _prefabCollectorBot;
+    private CollectorBot _prefabCollectorBot;
     private SingleReactiveProperty<int> _numberOfBots = new();
-    private List<CollectorBotAI> _poolCollectorBots = new List<CollectorBotAI>();
+    private List<CollectorBot> _poolCollectorBots = new List<CollectorBot>();
     private Dictionary<Price, AmountOfResources> _priceList = new();
 
     public IStore Store { get { return _store; } }
@@ -36,7 +36,7 @@ public class MainBaseAI : Building
 
     public void SubscribeChangesNumberBots(Action<int> func) => _numberOfBots.Change += func;
     public void UnSubscribeChangesNumberBots(Action<int> func) => _numberOfBots.Change -= func;
-    public AmountOfResources GetPriceOf(Price price) => _priceList[price];       // Вынести в отдельную сущность
+    public AmountOfResources GetPriceOf(Price price) => _priceList[price];
 
     public override void Selected()
     {
@@ -52,20 +52,20 @@ public class MainBaseAI : Building
 
     public void CreateCollectorBot()
     {
-        var collectorBot = Instantiate<CollectorBotAI>(_prefabCollectorBot);
+        var collectorBot = Instantiate<CollectorBot>(_prefabCollectorBot);
         TaskManager.AddCollectorBot(collectorBot);
         collectorBot.GoTo(_gatheringPoint.transform.position);
         _numberOfBots.Value++;
     }
 
-    public void ReceiveCollectorBot(CollectorBotAI bot)
+    public void ReceiveCollectorBot(CollectorBot bot)
     {
         TaskManager.AddCollectorBot(bot);
         _poolCollectorBots.Add(bot);
         _numberOfBots.Value++;
     }
 
-    public void TransferCollectorBot(BuildingUnderConstruction newBase, CollectorBotAI bot)
+    public void TransferCollectorBot(BuildingUnderConstruction newBase, CollectorBot bot)
     {
         TaskManager.RemoveCollectorBot(bot);
         _poolCollectorBots.Remove(bot);
@@ -75,16 +75,18 @@ public class MainBaseAI : Building
 
     private void StartInicialization()
     {
+        const float Half = 0.5f;
+        const string MapTag = "Map";
         _buildingPanelUI = FindFirstObjectByType<DownPanelUI>();
-        _map = GameObject.FindGameObjectWithTag("Map").transform;                               // Magical ???
-        _selectionIndicator.localScale = Vector3.one * 0.5f;                                    // Magical ???
+        _map = GameObject.FindGameObjectWithTag(MapTag).transform;
+        _selectionIndicator.localScale = Vector3.one * Half;
         TaskManager.AddResourceScaner(new ResourceScaner(_map));
-        _prefabCollectorBot = Resources.Load<CollectorBotAI>("Prefabs/CollectorBot");
+        _prefabCollectorBot = Resources.Load<CollectorBot>("Prefabs/CollectorBot");
         CreateStartingPriceList();
         StartCoroutine(StartInitialization());
     }
 
-    private void CreateStartingPriceList()                                                       // Прайс лист вынести в отдельную сущность
+    private void CreateStartingPriceList()
     {
         AmountOfResources mainBasePrice = new AmountOfResources();
         mainBasePrice.Food = 2;
@@ -102,7 +104,7 @@ public class MainBaseAI : Building
     {
         var delay = new WaitForSeconds(1f);
 
-        for (int i = 0; i < _startCountCollectorBots; i++)
+        for (int i = 0; i < _startingNumberOfBots; i++)
         {
             yield return delay;
             CreateCollectorBot();

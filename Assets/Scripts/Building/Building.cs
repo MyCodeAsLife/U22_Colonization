@@ -50,8 +50,11 @@ public class Building : ChangingObject
 
     private void OnDrawGizmosSelected()
     {
-        float startPositionX = SelfSize.x * _buildingPlacer.CellSize * 0.5f - 0.5f;
-        float startPositionZ = SelfSize.z * _buildingPlacer.CellSize * 0.5f - 0.5f;
+        const float Half = 0.5f;
+        const float Offset = 0.5f;
+
+        float startPositionX = SelfSize.x * _buildingPlacer.CellSize * Half - Offset;
+        float startPositionZ = SelfSize.z * _buildingPlacer.CellSize * Half - Offset;
         Vector3 pos = transform.position - new Vector3(startPositionX, 0, startPositionZ);
 
         for (int x = 0; x < SelfSize.x; x++)

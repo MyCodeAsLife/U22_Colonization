@@ -92,6 +92,8 @@ public class ResourceSpawner : MonoBehaviour
 
     private IEnumerator SpawnRes(ResourceSpawnerBase resourceSpawner, int numberOfResource)
     {
+        Vector3 checkArea = new Vector3(3, 3, 3);
+        Vector3 spawnPos = Vector3.zero;
         var delay = new WaitForSeconds(_spawnDelay);
         bool isWork = true;
 
@@ -99,8 +101,6 @@ public class ResourceSpawner : MonoBehaviour
         {
             yield return delay;
             isWork = true;
-            Vector3 checkArea = new Vector3(3, 3, 3);                               // Magic
-            Vector3 spawnPos = Vector3.zero;
 
             while (isWork)
             {

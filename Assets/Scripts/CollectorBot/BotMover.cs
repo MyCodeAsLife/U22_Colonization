@@ -5,9 +5,9 @@ using UnityEngine.AI;
 
 public class BotMover : MonoBehaviour
 {
+    private Vector3 _targetPoint;
     private NavMeshAgent _agent;
     private Coroutine _moving;
-    private Vector3 _targetPoint;
     private float _moveSpeed;
 
     public event Action MoveCompleted;
@@ -51,6 +51,7 @@ public class BotMover : MonoBehaviour
 
     private IEnumerator Moving()
     {
+        const float PermissibleFault = 0.1f;
         bool isWork = true;
         _targetPoint.y = 0;
 
@@ -59,7 +60,7 @@ public class BotMover : MonoBehaviour
             yield return null;
             _agent.destination = _targetPoint;
 
-            if (Vector3.Distance(transform.position, _targetPoint) < 0.1f)
+            if (Vector3Extensions.IsEnoughClose(transform.position, _targetPoint, PermissibleFault))
                 isWork = false;
         }
 

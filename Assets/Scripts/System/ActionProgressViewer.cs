@@ -14,16 +14,6 @@ public class ActionProgressViewer : MonoBehaviour
         _progressBar = Instantiate<Slider>(_prefabProgressBar, transform);
     }
 
-    public void SetProgressBarPosition(Vector3 position)
-    {
-        _progressBar.transform.localPosition = position;
-    }
-
-    public void SetProgressBarScale(Vector3 scale)
-    {
-        _progressBar.transform.localScale = scale;
-    }
-
     private void OnDisable()
     {
         _presenter.ActionStarted -= OnStartAction;
@@ -39,18 +29,9 @@ public class ActionProgressViewer : MonoBehaviour
         _presenter.SubscribeToActionProgress(OnActionProgress);
     }
 
-    private void OnActionProgress(float value)
-    {
-        _progressBar.value = value;
-    }
-
-    private void OnStartAction()
-    {
-        _progressBar.gameObject.SetActive(true);
-    }
-
-    private void OnFinishAction()
-    {
-        _progressBar.gameObject.SetActive(false);
-    }
+    public void SetProgressBarPosition(Vector3 position) => _progressBar.transform.localPosition = position;
+    public void SetProgressBarScale(Vector3 scale) => _progressBar.transform.localScale = scale;
+    private void OnActionProgress(float value) => _progressBar.value = value;
+    private void OnStartAction() => _progressBar.gameObject.SetActive(true);
+    private void OnFinishAction() => _progressBar.gameObject.SetActive(false);
 }

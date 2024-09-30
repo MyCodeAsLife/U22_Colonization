@@ -5,15 +5,15 @@ using UnityEngine;
 public class TaskManager : MonoBehaviour
 {
     private IStore _store;
-    private MainBaseAI _mainBase;
+    private MainBase _mainBase;
     private Coroutine _resourceScaning;
     private ResourceScaner _resourceScaner;
     private BuildingUnderConstruction _scheduleBuilding;
 
     private List<Task> _taskPool = new();
     private List<IResource> _resourcePool = new();
-    private List<CollectorBotAI> _poolOfIdleCollectorBots = new();
-    private List<CollectorBotAI> _poolOfWorkingCollectorBots = new();
+    private List<CollectorBot> _poolOfIdleCollectorBots = new();
+    private List<CollectorBot> _poolOfWorkingCollectorBots = new();
 
     private void OnDisable()
     {
@@ -26,7 +26,7 @@ public class TaskManager : MonoBehaviour
 
     private void Awake()
     {
-        _mainBase = GetComponent<MainBaseAI>();
+        _mainBase = GetComponent<MainBase>();
         _store = _mainBase.Store;
     }
 
@@ -36,7 +36,7 @@ public class TaskManager : MonoBehaviour
         _resourceScaning = StartCoroutine(ResourceScanning());
     }
 
-    public void AddCollectorBot(CollectorBotAI collectorBot)
+    public void AddCollectorBot(CollectorBot collectorBot)
     {
         collectorBot.SetBaseAffiliation(_mainBase);
         collectorBot.TaskCompleted += OnTaskCompleted;
@@ -45,7 +45,7 @@ public class TaskManager : MonoBehaviour
         _poolOfIdleCollectorBots.Add(collectorBot);
     }
 
-    public void RemoveCollectorBot(CollectorBotAI collectorBot)
+    public void RemoveCollectorBot(CollectorBot collectorBot)
     {
         _poolOfIdleCollectorBots.Remove(collectorBot);
         _poolOfWorkingCollectorBots.Remove(collectorBot);
@@ -92,13 +92,15 @@ public class TaskManager : MonoBehaviour
     {
         var amountOfResources = _store.AmountOfResources;
         var price = _mainBase.GetPriceOf(Price.MainBase);
+        const int BuildingPriority = 0;
+        const int MinimumRequiredNumberOfBots = 1;
 
         if (amountOfResources.Food >= price.Food &&
             amountOfResources.Timber >= price.Timber &&
             amountOfResources.Marble >= price.Marble &&
-            _mainBase.NumberOfBots > 0)                                                               // Magic
+            _mainBase.NumberOfBots > MinimumRequiredNumberOfBots)
         {
-            AddTask(new Task(0, TypesOfTasks.Constructing, _scheduleBuilding));                    // Magic
+            AddTask(new Task(BuildingPriority, TypeOfTask.Constructing, _scheduleBuilding));
             _scheduleBuilding = null;
             _mainBase.Store.SubtractResources(price);
             return true;
@@ -109,7 +111,7 @@ public class TaskManager : MonoBehaviour
         }
     }
 
-    private void OnTaskCompleted(CollectorBotAI bot)
+    private void OnTaskCompleted(CollectorBot bot)
     {
         _poolOfWorkingCollectorBots.Remove(bot);
 
@@ -119,12 +121,14 @@ public class TaskManager : MonoBehaviour
 
     private Task GetHarvestTask()
     {
+        const int HarvestPriority = 1;
+
         for (int i = 0; i < _resourcePool.Count; i++)
         {
             if (_resourcePool[i].IsOccupied == false)
             {
                 _resourcePool[i].Occupy();
-                return new Task(1, TypesOfTasks.Harvesting, _resourcePool[i] as Resource);               // Magic
+                return new Task(HarvestPriority, TypeOfTask.Harvesting, _resourcePool[i] as Resource);
             }
         }
 
@@ -181,7 +185,7 @@ public class TaskManager : MonoBehaviour
 
             _poolOfIdleCollectorBots[0].SetTask(task);
 
-            if (task.TypeOfTask == TypesOfTasks.Constructing)
+            if (task.TypeOfTask == TypeOfTask.Constructing)
             {
                 _mainBase.TransferCollectorBot(task.Target as BuildingUnderConstruction, _poolOfIdleCollectorBots[0]);
             }

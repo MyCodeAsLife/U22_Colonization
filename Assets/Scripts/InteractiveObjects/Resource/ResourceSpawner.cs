@@ -70,7 +70,10 @@ public class ResourceSpawner : MonoBehaviour
         StartCoroutine(InitialResourceSpawn());
     }
 
-    private Resource CreateResource(Resource prefab) => Instantiate<Resource>(prefab);
+    private Resource CreateResource(Resource prefab)
+    {
+        return Instantiate<Resource>(prefab);
+    }
 
     private void OnFoodCollecting()
     {

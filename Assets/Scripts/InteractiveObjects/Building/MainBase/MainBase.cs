@@ -17,9 +17,9 @@ public class MainBase : Building
     private List<CollectorBot> _poolCollectorBots = new List<CollectorBot>();
     private Dictionary<Price, AmountOfResources> _priceList = new();
 
-    public IStore Store { get { return _store; } }
     public TaskManager TaskManager { get; private set; }
     public int NumberOfBots => _numberOfBots.Value;
+    public IStore Store => _store;
 
     protected override void Awake()
     {
@@ -34,9 +34,20 @@ public class MainBase : Building
         StartInicialization();
     }
 
-    public void SubscribeChangesNumberBots(Action<int> func) => _numberOfBots.Change += func;
-    public void UnSubscribeChangesNumberBots(Action<int> func) => _numberOfBots.Change -= func;
-    public AmountOfResources GetPriceOf(Price price) => _priceList[price];
+    public void SubscribeChangesNumberBots(Action<int> func)
+    {
+        _numberOfBots.Change += func;
+    }
+
+    public void UnSubscribeChangesNumberBots(Action<int> func)
+    {
+        _numberOfBots.Change -= func;
+    }
+
+    public AmountOfResources GetPriceOf(Price price)
+    {
+        return _priceList[price];
+    }
 
     public override void Selected()
     {
@@ -79,7 +90,7 @@ public class MainBase : Building
         const string MapTag = "Map";
         _buildingPanelUI = FindFirstObjectByType<DownPanelUI>();
         _map = GameObject.FindGameObjectWithTag(MapTag).transform;
-        _selectionIndicator.localScale = Vector3.one * Half;
+        SelectionIndicator.localScale = Vector3.one * Half;
         TaskManager.AddResourceScaner(new ResourceScaner(_map));
         _prefabCollectorBot = Resources.Load<CollectorBot>("Prefabs/CollectorBot");
         CreateStartingPriceList();
@@ -89,9 +100,9 @@ public class MainBase : Building
     private void CreateStartingPriceList()
     {
         AmountOfResources mainBasePrice = new AmountOfResources();
-        mainBasePrice.Food = 2;
-        mainBasePrice.Timber = 2;
-        mainBasePrice.Marble = 2;
+        mainBasePrice.Food = 3;
+        mainBasePrice.Timber = 3;
+        mainBasePrice.Marble = 3;
         _priceList.Add(Price.MainBase, mainBasePrice);
         AmountOfResources botPrice = new AmountOfResources();
         botPrice.Food = 1;

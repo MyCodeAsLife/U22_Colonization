@@ -5,9 +5,9 @@ public class ObjectPool<T>
 {
     private readonly T _environments;
 
-    private readonly Func<T, T> CreateObject;
-    private readonly Action<T> DisableObject;
-    private readonly Action<T> EnableObject;
+    private readonly Func<T, T> _createObject;
+    private readonly Action<T> _disableObject;
+    private readonly Action<T> _enableObject;
 
     private Queue<T> _pool = new();
     private List<T> _active = new();
@@ -15,26 +15,26 @@ public class ObjectPool<T>
     public ObjectPool(T environments, Func<T, T> createObject, Action<T> enableObject, Action<T> disableObject)
     {
         _environments = environments;
-        CreateObject = createObject;
-        EnableObject = enableObject;
-        DisableObject = disableObject;
+        _createObject = createObject;
+        _enableObject = enableObject;
+        _disableObject = disableObject;
 
-        Return(CreateObject(_environments));
+        Return(_createObject(_environments));
     }
 
     public int ActiveResourcesCount => _active.Count;
 
     public T Get()
     {
-        T obj = _pool.Count > 0 ? _pool.Dequeue() : CreateObject(_environments);
-        EnableObject(obj);
+        T obj = _pool.Count > 0 ? _pool.Dequeue() : _createObject(_environments);
+        _enableObject(obj);
         _active.Add(obj);
         return obj;
     }
 
     public void Return(T obj)
     {
-        DisableObject(obj);
+        _disableObject(obj);
         _active.Remove(obj);
         _pool.Enqueue(obj);
     }

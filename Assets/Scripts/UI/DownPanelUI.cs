@@ -9,9 +9,9 @@ public class DownPanelUI : MonoBehaviour
     [SerializeField] private TMP_Text _displayNumberOfMarble;
 
     private GameObject _buildingPlacerPrefab;
-    private SelectableObject _selectedObject;
     private BuildingPlacer _buildingPlacer;
     private OrderButton[] _orderButtons;
+    private MainBase _selectedBase;
     private Vector3 _showPosition;
     private Vector3 _hidePosition;
     private float _swimmingSpeed;
@@ -36,11 +36,9 @@ public class DownPanelUI : MonoBehaviour
 
     public void LinkBase(MainBase mainBase)
     {
-        _selectedObject = mainBase;
-        ChangeResourcesNumber(mainBase);
-        mainBase.Store.FoodQuantityChanged += OnChangeNumberOfFood;
-        mainBase.Store.TimberQuantityChanged += OnChangeNumberOfTimber;
-        mainBase.Store.MarbleQuantityChanged += OnChangeNumberOfMarble;
+        _selectedBase = mainBase;
+        DisplayResourceQuantity();
+        mainBase.Store.ResourcesQuantityChanged += DisplayResourceQuantity;
 
         for (int i = 0; i < _orderButtons.Length; i++)
             _orderButtons[i].SetCustomer(mainBase);
@@ -51,15 +49,9 @@ public class DownPanelUI : MonoBehaviour
     public void UnLinkBase(MainBase mainBase)
     {
         HidePanel();
-        mainBase.Store.FoodQuantityChanged -= OnChangeNumberOfFood;
-        mainBase.Store.TimberQuantityChanged -= OnChangeNumberOfTimber;
-        mainBase.Store.MarbleQuantityChanged -= OnChangeNumberOfMarble;
-        _selectedObject = null;
+        mainBase.Store.ResourcesQuantityChanged -= DisplayResourceQuantity;
+        _selectedBase = null;
     }
-
-    private void OnChangeNumberOfFood(int number) => _displayNumberOfFood.text = "Food: " + number.ToString();
-    private void OnChangeNumberOfTimber(int number) => _displayNumberOfTimber.text = "Timber: " + number.ToString();
-    private void OnChangeNumberOfMarble(int number) => _displayNumberOfMarble.text = "Marble: " + number.ToString();
 
     private void ShowPanel()
     {
@@ -77,13 +69,16 @@ public class DownPanelUI : MonoBehaviour
         _swimming = StartCoroutine(SwimmingPanel(_hidePosition));
     }
 
-    private void ChangeResourcesNumber(MainBase mainBase)
+    public void DisplayResourceQuantity()
     {
-        AmountOfResources amountOfResources = mainBase.Store.AmountOfResources;
+        if (_selectedBase != null)
+        {
+            AmountOfResources amountOfResources = _selectedBase.Store.AmountOfResources;
 
-        OnChangeNumberOfFood(amountOfResources.Food);
-        OnChangeNumberOfTimber(amountOfResources.Timber);
-        OnChangeNumberOfMarble(amountOfResources.Marble);
+            _displayNumberOfFood.text = "Food: " + amountOfResources.Food.ToString();
+            _displayNumberOfTimber.text = "Timber: " + amountOfResources.Timber.ToString();
+            _displayNumberOfMarble.text = "Marble: " + amountOfResources.Marble.ToString();
+        }
     }
 
     private IEnumerator SwimmingPanel(Vector3 targetPosition)

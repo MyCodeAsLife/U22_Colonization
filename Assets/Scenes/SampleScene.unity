@@ -264,7 +264,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 020d7bbbcf7cb8e40b8afd83352c8f6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectPrice: 1
+  ObjectPrice: 0
 --- !u!1 &150286244
 GameObject:
   m_ObjectHideFlags: 0
@@ -1372,8 +1372,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.286763, y: 0.70550364, z: -0.39540848, w: 0.51350147}
-  m_LocalPosition: {x: -29.862076, y: 34.992706, z: 7.5525794}
+  m_LocalRotation: {x: -0.3471293, y: -0.64660406, z: 0.4265561, w: -0.5286344}
+  m_LocalPosition: {x: -25.340574, y: 44.011738, z: 4.5542493}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1795,8 +1795,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2200ea959db0a9a449e061e796d50de7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectPrice: 0
-  Placer: {fileID: 963194232}
+  ObjectPrice: 0
+  _placer: {fileID: 963194232}
   _prefab: {fileID: -1971995159953543927, guid: 737d7d2ac0fa2634d8e6c4e4a0187ed8, type: 3}
 --- !u!1 &1648873979
 GameObject:
@@ -2080,8 +2080,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2200ea959db0a9a449e061e796d50de7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectPrice: 0
-  Placer: {fileID: 963194232}
+  ObjectPrice: 0
+  _placer: {fileID: 0}
   _prefab: {fileID: 0}
 --- !u!1 &1862855319
 GameObject:
@@ -2351,7 +2351,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 035e850ddf44edb4cbae7db9486da2d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _startingNumberOfBots: 3
+  _startingNumberOfBots: 4
 --- !u!1 &2007076558
 GameObject:
   m_ObjectHideFlags: 0

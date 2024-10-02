@@ -31,7 +31,7 @@ public class PlayerControlSystem : MonoBehaviour
     private int _groundMask;
     private int _uiMask;
 
-    public MainInputActions InputActions { get { return _inputActions; } }
+    public MainInputActions InputActions => _inputActions;
 
     private void Awake()
     {
@@ -111,8 +111,15 @@ public class PlayerControlSystem : MonoBehaviour
         return _ray.GetPoint(distance);
     }
 
-    private void OnReleaseCtrl(InputAction.CallbackContext context) => _states.PresedCtrl = false;
-    private void OnPressCtrl(InputAction.CallbackContext context) => _states.PresedCtrl = true;
+    private void OnReleaseCtrl(InputAction.CallbackContext context)
+    {
+        _states.PresedCtrl = false;
+    }
+
+    private void OnPressCtrl(InputAction.CallbackContext context)
+    {
+        _states.PresedCtrl = true;
+    }
 
     private void OnDestroyObject()
     {

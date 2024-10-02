@@ -10,9 +10,9 @@ public class CollectorBot : ChangingObject
     private int _interactableObjectMask;
     private Vector3 _resourceAttachmentPoint;
 
-    public Task CurrentTask { get; private set; }
-
     public event Action<CollectorBot> TaskCompleted;
+
+    public Task CurrentTask { get; private set; }
 
     protected override void Awake()
     {

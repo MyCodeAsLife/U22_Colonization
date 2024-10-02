@@ -2,9 +2,9 @@ using System;
 
 public interface IResource
 {
-    public bool IsOccupied { get; }
-
     public event Action<Resource> Harvest;
+
+    public bool IsOccupied { get; }
 
     public ResourceType GetResourceType();
 

@@ -2,16 +2,16 @@ using UnityEngine;
 
 public class OrderButton : MonoBehaviour
 {
-    [SerializeField] protected Price objectPrice;
+    [SerializeField] protected Price ObjectPrice;
 
-    protected MainBase _currentBuilding;
+    protected MainBase CurrentBuilding;
 
     public void SetCustomer(MainBase building)
     {
-        _currentBuilding = building;
+        CurrentBuilding = building;
     }
 
-    protected bool CheckPriceAvailability(AmountOfResources amount, AmountOfResources price)
+    protected bool IsEnoughResources(AmountOfResources amount, AmountOfResources price)
     {
         return amount.Food >= price.Food && amount.Timber >= price.Timber && amount.Marble >= price.Marble;
     }

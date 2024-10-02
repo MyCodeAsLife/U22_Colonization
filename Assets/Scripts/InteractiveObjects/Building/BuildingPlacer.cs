@@ -30,10 +30,25 @@ public class BuildingPlacer : MonoBehaviour
         _controlSysytem = GetComponent<PlayerControlSystem>();
     }
 
-    public void SelectInteractiveObject(MainBase interactiveObject) => _selectedInteractiveObject = interactiveObject;
-    public void UnSelectInteractiveObject() => _selectedInteractiveObject = null;
-    public void SubscribeOnCellSizeChanged(Action<float> fun) => _cellSize.Change += fun;
-    public void UnSubscribeOnCellSizeChanged(Action<float> fun) => _cellSize.Change -= fun;
+    public void SelectInteractiveObject(MainBase interactiveObject)
+    {
+        _selectedInteractiveObject = interactiveObject;
+    }
+
+    public void UnSelectInteractiveObject()
+    {
+        _selectedInteractiveObject = null;
+    }
+
+    public void SubscribeOnCellSizeChanged(Action<float> fun)
+    {
+        _cellSize.Change += fun;
+    }
+
+    public void UnSubscribeOnCellSizeChanged(Action<float> fun)
+    {
+        _cellSize.Change -= fun;
+    }
 
     public void CreateFlyingBuilding(BuildingUnderConstruction prefab)
     {

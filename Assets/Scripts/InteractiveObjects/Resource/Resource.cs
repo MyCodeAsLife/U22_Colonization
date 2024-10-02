@@ -7,13 +7,24 @@ public class Resource : SelectableObject, IResource
 
     private int _id;
 
-    public bool IsOccupied { get; private set; }
-
     public event Action<Resource> Harvest;
 
-    public int GetId() => _id;
-    public void SetID(int id) => _id = id;
-    public ResourceType GetResourceType() => _resourceType;
+    public bool IsOccupied { get; private set; }
+
+    public int GetId()
+    {
+        return _id;
+    }
+
+    public void SetID(int id)
+    {
+        _id = id;
+    }
+
+    public ResourceType GetResourceType()
+    {
+        return _resourceType;
+    }
 
     public void Occupy()
     {

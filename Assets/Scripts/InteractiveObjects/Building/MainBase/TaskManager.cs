@@ -70,22 +70,23 @@ public class TaskManager : MonoBehaviour
 
         if (CheckingForConditionsForConstruction() == false)
         {
-            _mainBase.SubscribeChangesNumberBots(WaitingForConditionsForConstruction);
-            _store.FoodQuantityChanged += WaitingForConditionsForConstruction;
-            _store.TimberQuantityChanged += WaitingForConditionsForConstruction;
-            _store.MarbleQuantityChanged += WaitingForConditionsForConstruction;
+            _mainBase.SubscribeChangesNumberBots(OnBotsQuantityChanged);
+            _store.ResourcesQuantityChanged += WaitingForConditionsForConstruction;
         }
     }
 
-    private void WaitingForConditionsForConstruction(int number)
+    private void WaitingForConditionsForConstruction()
     {
         if (CheckingForConditionsForConstruction())
         {
-            _mainBase.UnSubscribeChangesNumberBots(WaitingForConditionsForConstruction);
-            _store.FoodQuantityChanged -= WaitingForConditionsForConstruction;
-            _store.TimberQuantityChanged -= WaitingForConditionsForConstruction;
-            _store.MarbleQuantityChanged -= WaitingForConditionsForConstruction;
+            _mainBase.UnSubscribeChangesNumberBots(OnBotsQuantityChanged);
+            _store.ResourcesQuantityChanged += WaitingForConditionsForConstruction;
         }
+    }
+
+    private void OnBotsQuantityChanged(int amount)
+    {
+        WaitingForConditionsForConstruction();
     }
 
     private bool CheckingForConditionsForConstruction()

@@ -21,9 +21,20 @@ public class ChangingObject : SelectableObject
             ActionProgressViewer = transform.AddComponent<ActionProgressViewer>();
     }
 
-    public void SubscribeToActionProgress(Action<float> func) => ActionProgress.Change += func;
-    public void UnsubscribeToActionProgress(Action<float> func) => ActionProgress.Change -= func;
-    public float GetActionProgress() => ActionProgress.Value;
+    public void SubscribeToActionProgress(Action<float> func)
+    {
+        ActionProgress.Change += func;
+    }
+
+    public void UnsubscribeToActionProgress(Action<float> func)
+    {
+        ActionProgress.Change -= func;
+    }
+
+    public float GetActionProgress()
+    {
+        return ActionProgress.Value;
+    }
 
     protected virtual void StopAction()
     {

@@ -36,18 +36,6 @@ public class Building : ChangingObject
         OnCellSizeChange(_buildingPlacer.CellSize);
     }
 
-    public void DisplayInvalidPosition()
-    {
-        for (int i = 0; i < _renderers.Length; i++)
-            _renderers[i].material.color += Color.red;
-    }
-
-    public void DisplayValidPosition()
-    {
-        for (int i = 0; i < _renderers.Length; i++)
-            _renderers[i].material.color = _startColors[i];
-    }
-
     private void OnDrawGizmosSelected()
     {
         const float Half = 0.5f;
@@ -67,6 +55,18 @@ public class Building : ChangingObject
                 Gizmos.DrawWireCube(pos + new Vector3(sizeX, 0, sizeZ), _square);
             }
         }
+    }
+
+    public void DisplayInvalidPosition()
+    {
+        for (int i = 0; i < _renderers.Length; i++)
+            _renderers[i].material.color += Color.red;
+    }
+
+    public void DisplayValidPosition()
+    {
+        for (int i = 0; i < _renderers.Length; i++)
+            _renderers[i].material.color = _startColors[i];
     }
 
     private void OnCellSizeChange(float cellSize)

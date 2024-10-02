@@ -4,11 +4,7 @@ public class Store : IStore
 {
     private AmountOfResources _amountOfResources = new();
 
-    public AmountOfResources AmountOfResources { get { return _amountOfResources; } }
-
-    public event Action<int> FoodQuantityChanged;
-    public event Action<int> TimberQuantityChanged;
-    public event Action<int> MarbleQuantityChanged;
+    public event Action ResourcesQuantityChanged;
 
     public Store(int amountFood = 0, int amountTimber = 0, int amountMarble = 0)
     {
@@ -16,6 +12,8 @@ public class Store : IStore
         _amountOfResources.Timber = 0;
         _amountOfResources.Marble = 0;
     }
+
+    public AmountOfResources AmountOfResources { get { return _amountOfResources; } }
 
     public void StoreResource(ResourceType resourceType)
     {
@@ -40,6 +38,8 @@ public class Store : IStore
         ReduceFood(amount.Food);
         ReduceTimber(amount.Timber);
         ReduceMarble(amount.Marble);
+
+        ResourcesQuantityChanged?.Invoke();
     }
 
     private void AddFood(int amount)
@@ -47,7 +47,7 @@ public class Store : IStore
         if (amount > 0)
         {
             _amountOfResources.Food += amount;
-            FoodQuantityChanged?.Invoke(_amountOfResources.Food);
+            ResourcesQuantityChanged?.Invoke();
         }
     }
 
@@ -56,7 +56,7 @@ public class Store : IStore
         if (amount > 0)
         {
             _amountOfResources.Timber += amount;
-            TimberQuantityChanged?.Invoke(_amountOfResources.Timber);
+            ResourcesQuantityChanged?.Invoke();
         }
     }
 
@@ -65,34 +65,25 @@ public class Store : IStore
         if (amount > 0)
         {
             _amountOfResources.Marble += amount;
-            MarbleQuantityChanged?.Invoke(_amountOfResources.Marble);
+            ResourcesQuantityChanged?.Invoke();
         }
     }
 
     private void ReduceFood(int amount)
     {
         if (amount > 0)
-        {
             _amountOfResources.Food -= amount;
-            FoodQuantityChanged?.Invoke(_amountOfResources.Food);
-        }
     }
 
     private void ReduceTimber(int amount)
     {
         if (amount > 0)
-        {
             _amountOfResources.Timber -= amount;
-            TimberQuantityChanged?.Invoke(_amountOfResources.Timber);
-        }
     }
 
     private void ReduceMarble(int amount)
     {
         if (amount > 0)
-        {
             _amountOfResources.Marble -= amount;
-            MarbleQuantityChanged?.Invoke(_amountOfResources.Marble);
-        }
     }
 }

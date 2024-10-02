@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class BuildingOrder : OrderButton
 {
-    [SerializeField] protected BuildingPlacer Placer;
+    [SerializeField] private BuildingPlacer _placer;
     [SerializeField] private BuildingUnderConstruction _prefab;
 
     public void CreateFlyingBuilding()
     {
-        Placer.CreateFlyingBuilding(_prefab);
+        _placer.CreateFlyingBuilding(_prefab);
     }
 }

@@ -3,15 +3,13 @@ using UnityEngine;
 
 public class ResourceSpawnerBase
 {
-    private readonly Transform _parent;
-    private readonly Resource _prefabResource;
     private readonly Func<Resource, Resource> _createResource;
+    private readonly Resource _prefabResource;
+    private readonly Transform _parent;
 
     private ObjectPool<Resource> _pool;
 
-    public Action Collected;
-
-    public int NumberOfActiveResources => _pool.ActiveResourcesCount;
+    public event Action Collected;
 
     public ResourceSpawnerBase(Resource prefabResource, Func<Resource, Resource> createFunc, Transform parent)
     {
@@ -25,6 +23,8 @@ public class ResourceSpawnerBase
     {
         RemoveResourcesFromMap();
     }
+
+    public int NumberOfActiveResources => _pool.ActiveResourcesCount;
 
     public void RemoveResourcesFromMap()
     {

@@ -2,12 +2,12 @@ public class UnitOrder : OrderButton
 {
     public void TryBuy()
     {
-        AmountOfResources price = _currentBuilding.GetPriceOf(objectPrice);
+        AmountOfResources price = CurrentBuilding.GetPriceOf(ObjectPrice);
 
-        if (CheckPriceAvailability(_currentBuilding.Store.AmountOfResources, price))
+        if (IsEnoughResources(CurrentBuilding.Store.AmountOfResources, price))
         {
-            _currentBuilding.Store.SubtractResources(price);
-            _currentBuilding.CreateCollectorBot();
+            CurrentBuilding.Store.SubtractResources(price);
+            CurrentBuilding.CreateCollectorBot();
         }
     }
 }

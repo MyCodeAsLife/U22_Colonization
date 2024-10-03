@@ -17,7 +17,7 @@ public class MainBase : Building
     private List<CollectorBot> _poolCollectorBots = new List<CollectorBot>();
     private Dictionary<Price, AmountOfResources> _priceList = new();
 
-    public TaskManager TaskManager { get; private set; }
+    public ITaskManager TaskManager { get; private set; }
     public int NumberOfBots => _numberOfBots.Value;
     public IStore Store => _store;
 
@@ -100,14 +100,14 @@ public class MainBase : Building
     private void CreateStartingPriceList()
     {
         AmountOfResources mainBasePrice = new AmountOfResources();
-        mainBasePrice.Food = 3;
-        mainBasePrice.Timber = 3;
-        mainBasePrice.Marble = 3;
+        mainBasePrice.Food = 5;
+        mainBasePrice.Timber = 5;
+        mainBasePrice.Marble = 5;
         _priceList.Add(Price.MainBase, mainBasePrice);
         AmountOfResources botPrice = new AmountOfResources();
-        botPrice.Food = 1;
-        botPrice.Timber = 1;
-        botPrice.Marble = 0;
+        botPrice.Food = 3;
+        botPrice.Timber = 3;
+        botPrice.Marble = 3;
         _priceList.Add(Price.CollectorBot, botPrice);
     }
 

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TaskManager : MonoBehaviour
+public class TaskManager : MonoBehaviour, ITaskManager
 {
     private IStore _store;
     private MainBase _mainBase;
@@ -14,6 +14,8 @@ public class TaskManager : MonoBehaviour
     private List<IResource> _resourcePool = new();
     private List<CollectorBot> _poolOfIdleCollectorBots = new();
     private List<CollectorBot> _poolOfWorkingCollectorBots = new();
+
+    public bool IsBuildingPlanned => _scheduleBuilding != null;
 
     private void OnDisable()
     {

@@ -61,7 +61,7 @@ public class ResourceSpawner : MonoBehaviour
 
         _maxFoodOnMap = 3;
         _maxMarbleOnMap = 3;
-        _maxTimberOnMap = 5;
+        _maxTimberOnMap = 3;
         _spawnDelay = 3f;
 
         _mapX = _map.localScale.x * Area;

@@ -36,11 +36,13 @@ public class MainBase : Building
 
     public void SubscribeChangesNumberBots(Action<int> func)
     {
+        Debug.Log("SubscribeChangesNumberBots");                              //++++++++++++++++++
         _numberOfBots.Change += func;
     }
 
     public void UnSubscribeChangesNumberBots(Action<int> func)
     {
+        Debug.Log("UnSubscribeChangesNumberBots");                              //++++++++++++++++++
         _numberOfBots.Change -= func;
     }
 

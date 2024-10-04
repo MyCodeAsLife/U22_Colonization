@@ -17,6 +17,17 @@ public class TaskManager : MonoBehaviour, ITaskManager
 
     public bool IsBuildingPlanned => _scheduleBuilding != null;
 
+    private void Awake()
+    {
+        _mainBase = GetComponent<MainBase>();
+        _store = _mainBase.Store;
+    }
+
+    private void OnEnable()
+    {
+        _store.ResourcesQuantityChanged += CheckShedule;
+    }
+
     private void OnDisable()
     {
         if (_resourceScaning != null)
@@ -24,12 +35,8 @@ public class TaskManager : MonoBehaviour, ITaskManager
             StopCoroutine(_resourceScaning);
             _resourceScaning = null;
         }
-    }
 
-    private void Awake()
-    {
-        _mainBase = GetComponent<MainBase>();
-        _store = _mainBase.Store;
+        _store.ResourcesQuantityChanged -= CheckShedule;
     }
 
     public void AddResourceScaner(ResourceScaner resourceScaner)
@@ -59,6 +66,9 @@ public class TaskManager : MonoBehaviour, ITaskManager
         if (_scheduleBuilding == null)
         {
             _scheduleBuilding = building;
+
+            if (TryStartConstruction() == false)
+                _mainBase.SubscribeChangesNumberBots(OnBotsQuantityChanged);
         }
         else if (_scheduleBuilding.IsBuildingInProgress)
         {
@@ -69,29 +79,44 @@ public class TaskManager : MonoBehaviour, ITaskManager
             _scheduleBuilding.transform.position = building.transform.position;
             Destroy(building.gameObject);
         }
-
-        if (CheckingForConditionsForConstruction() == false)
-        {
-            _mainBase.SubscribeChangesNumberBots(OnBotsQuantityChanged);
-            _store.ResourcesQuantityChanged += WaitingForConditionsForConstruction;
-        }
     }
 
-    private void WaitingForConditionsForConstruction()
+    private void CheckShedule()
     {
-        if (CheckingForConditionsForConstruction())
+        if (_scheduleBuilding != null)
         {
-            _mainBase.UnSubscribeChangesNumberBots(OnBotsQuantityChanged);
-            _store.ResourcesQuantityChanged += WaitingForConditionsForConstruction;
+            if (TryStartConstruction())
+                _mainBase.UnSubscribeChangesNumberBots(OnBotsQuantityChanged);
+        }
+        else
+        {
+            TryBuyCollectorBot();
         }
     }
 
     private void OnBotsQuantityChanged(int amount)
     {
-        WaitingForConditionsForConstruction();
+        CheckShedule();
     }
 
-    private bool CheckingForConditionsForConstruction()
+    private bool TryBuyCollectorBot()
+    {
+        var amountOfResources = _store.AmountOfResources;
+        var price = _mainBase.GetPriceOf(Price.CollectorBot);
+
+        if (amountOfResources.Food >= price.Food &&
+            amountOfResources.Timber >= price.Timber &&
+            amountOfResources.Marble >= price.Marble)
+        {
+            _mainBase.Store.SubtractResources(price);
+            _mainBase.CreateCollectorBot();
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool TryStartConstruction()
     {
         var amountOfResources = _store.AmountOfResources;
         var price = _mainBase.GetPriceOf(Price.MainBase);
@@ -108,10 +133,8 @@ public class TaskManager : MonoBehaviour, ITaskManager
             _mainBase.Store.SubtractResources(price);
             return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
     private void OnTaskCompleted(CollectorBot bot)

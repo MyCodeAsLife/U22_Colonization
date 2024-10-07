@@ -6,9 +6,9 @@ using UnityEngine;
 
 public class MainBase : Building
 {
+    [SerializeField] private Transform _map;
     [SerializeField] private int _startingNumberOfBots;
 
-    private Transform _map;
     private Store _store = new();
     private DownPanelUI _buildingPanelUI;
     private GatheringPoint _gatheringPoint;
@@ -87,11 +87,8 @@ public class MainBase : Building
     private void StartInicialization()
     {
         const float Half = 0.5f;
-        const string MapTag = "Map";
         _buildingPanelUI = FindFirstObjectByType<DownPanelUI>();
-        _map = GameObject.FindGameObjectWithTag(MapTag).transform;
         SelectionIndicator.localScale = Vector3.one * Half;
-        TaskManager.AddResourceScaner(new ResourceScaner(_map));
         _prefabCollectorBot = Resources.Load<CollectorBot>("Prefabs/CollectorBot");
         CreateStartingPriceList();
         StartCoroutine(StartInitialization());

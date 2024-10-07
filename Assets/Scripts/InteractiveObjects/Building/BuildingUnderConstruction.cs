@@ -47,6 +47,7 @@ public class BuildingUnderConstruction : Building
     public void SetTransferBot(CollectorBot bot)
     {
         _transferBot = bot;
+        transform.SetParent(bot.transform.parent);
     }
 
     public void StartConstruction(ChangingObject builder)

@@ -6,8 +6,6 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerControlSystem))]
 public class BuildingPlacer : MonoBehaviour
 {
-    private const string ResourceSpawnerTag = "ResourceSpawner";
-
     private Dictionary<Vector3Int, Building> _buildingsPositions = new();
     private SingleReactiveProperty<float> _cellSize = new();
     private BuildingUnderConstruction _flyingBuilding;
@@ -52,7 +50,7 @@ public class BuildingPlacer : MonoBehaviour
 
     public void CreateFlyingBuilding(BuildingUnderConstruction prefab)
     {
-        var parent = GameObject.FindGameObjectWithTag(ResourceSpawnerTag).transform.parent;
+        var parent = GetComponentInParent<SceneObjectManager>().transform;
         _flyingBuilding = Instantiate(prefab, parent);
         _controlSysytem.InputActions.Mouse.Delta.started += OnMouseMove;
         _controlSysytem.InputActions.Mouse.LeftButtonClick.performed += OnMouseLeftButtonClick;

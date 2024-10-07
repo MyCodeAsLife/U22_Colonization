@@ -6,7 +6,7 @@ public class TaskManager : MonoBehaviour, ITaskManager
 {
     private IStore _store;
     private MainBase _mainBase;
-    private Coroutine _resourceScaning;
+    private Coroutine _distributingTasks;
     private ResourceScaner _resourceScaner;
     private BuildingUnderConstruction _scheduleBuilding;
 
@@ -25,24 +25,24 @@ public class TaskManager : MonoBehaviour, ITaskManager
 
     private void OnEnable()
     {
-        _store.ResourcesQuantityChanged += CheckShedule;
+        _store.ResourcesQuantityChanged += SelectAvailableAction;
     }
 
     private void OnDisable()
     {
-        if (_resourceScaning != null)
+        if (_distributingTasks != null)
         {
-            StopCoroutine(_resourceScaning);
-            _resourceScaning = null;
+            StopCoroutine(_distributingTasks);
+            _distributingTasks = null;
         }
 
-        _store.ResourcesQuantityChanged -= CheckShedule;
+        _store.ResourcesQuantityChanged -= SelectAvailableAction;
     }
 
-    public void AddResourceScaner(ResourceScaner resourceScaner)
+    private void Start()
     {
-        _resourceScaner = resourceScaner;
-        _resourceScaning = StartCoroutine(ResourceScanning());
+        _resourceScaner = GetComponentInParent<SceneObjectManager>().ResourceScaner;
+        _distributingTasks = StartCoroutine(DistributingTasks());
     }
 
     public void AddCollectorBot(CollectorBot collectorBot)
@@ -81,7 +81,7 @@ public class TaskManager : MonoBehaviour, ITaskManager
         }
     }
 
-    private void CheckShedule()
+    private void SelectAvailableAction()
     {
         if (_scheduleBuilding != null)
         {
@@ -96,7 +96,7 @@ public class TaskManager : MonoBehaviour, ITaskManager
 
     private void OnBotsQuantityChanged(int amount)
     {
-        CheckShedule();
+        SelectAvailableAction();
     }
 
     private bool TryBuyCollectorBot()
@@ -223,7 +223,7 @@ public class TaskManager : MonoBehaviour, ITaskManager
         }
     }
 
-    private IEnumerator ResourceScanning()
+    private IEnumerator DistributingTasks()
     {
         const float Delay = 2.0f;
         bool isWork = true;
@@ -231,10 +231,10 @@ public class TaskManager : MonoBehaviour, ITaskManager
         while (isWork)
         {
             yield return new WaitForSeconds(Delay);
-            _resourcePool = _resourceScaner.MapScaning();
+            _resourcePool = _resourceScaner.ResourcePool;
             DistributeTasks();
         }
 
-        _resourceScaning = null;
+        _distributingTasks = null;
     }
 }
